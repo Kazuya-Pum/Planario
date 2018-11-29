@@ -1,0 +1,46 @@
+package Planario;
+
+import javax.swing.*;
+
+public class Planaria {
+
+	String ownerName = "";
+	public int size = 0;
+	ImageIcon skin;
+	MyClient ownerIns;
+	public float rotate;
+	
+	float posX, posY;
+	
+	public Planaria(int size, ImageIcon skin, MyClient ownerIns, float posX, float posY){
+		this.size = size;
+		this.skin = skin;
+		this.ownerIns = ownerIns;
+		this.posX = posX;
+		this.posY = posY;
+		
+		run();
+	}
+	
+	void run(){
+		
+	}
+	
+	void Eat(Planaria target){
+		size += target.size;
+		target.Death();
+	}
+	
+	void Death(){
+		ownerIns.Eaten();
+		
+	}
+	
+	public void Split(){
+		
+	}
+	
+	public void Move(){
+		
+	}
+}
