@@ -24,7 +24,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener {
 	public java.util.List<Planaria> planariaList = new ArrayList<Planaria>();
 	MediaTracker tracker;
 	public ImageIcon[] skins = new ImageIcon[2];
-	public int Vector2[] = new int[2];
+	public float Vector2[] = new float[2];
 
 	public int fps = 20;
 
@@ -52,7 +52,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener {
 
 					for (int i = planariaList.size() - 1; i >= 0; i--) {
 						Planaria p = planariaList.get(i);
-						p.setData(p.posX + Vector2[0] * p.speed, p.posY + Vector2[1] * p.speed, -1);
+						p.setData(p.posX + (int) (Vector2[0] * p.speed), p.posY + (int) (Vector2[1] * p.speed), -1);
 						Update(p);
 					}
 
@@ -148,7 +148,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener {
 		return planaria;
 	}
 
-	private void normalize(int[] vector) {
+	private void normalize(float[] vector) {
 		double mag = Math.hypot(vector[0], vector[1]);
 
 		vector[0] *= 5 / mag;
@@ -179,7 +179,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener {
 
 		for (Planaria planaria : tmp) {
 			Planaria child = Create(planaria.skin, planaria.posX, planaria.posY, planaria.size / 2);
-			child.setData(planaria.posX + Vector2[0] * 100, planaria.posY + Vector2[1] * 100, -1);
+			child.setData(planaria.posX + (int) (Vector2[0] * 100), planaria.posY + (int) (Vector2[1] * 100), -1);
 			planaria.setData(-1, -1, planaria.size / 2);
 		}
 	}
