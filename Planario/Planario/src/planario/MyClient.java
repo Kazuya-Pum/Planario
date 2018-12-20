@@ -178,7 +178,7 @@ public class MyClient extends JFrame {
 
 	public void Disconnect(int userID) {
 		Collection<Planaria> tmp = GetPlayer(userID).planariaData.values();
-		for(Planaria p : tmp) {
+		for (Planaria p : tmp) {
 			drow.Delete(p);
 			p = null;
 		}
@@ -192,6 +192,21 @@ public class MyClient extends JFrame {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+	}
+
+	public void SendMyPlanariaData(Planaria p) {
+		StringBuilder buf = new StringBuilder();
+		buf.append("Update ");
+		buf.append(myNumberInt);
+		buf.append(" ");
+		buf.append(p.localId);
+		buf.append(" ");
+		buf.append(p.posX);
+		buf.append(" ");
+		buf.append(p.posY);
+		buf.append(" ");
+		buf.append(p.size);
+		SendMessage(buf.toString());
 	}
 
 	public static void main(String[] args) {
