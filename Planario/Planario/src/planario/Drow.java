@@ -12,6 +12,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Random;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,18 +24,20 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JPanel panel;
-	private JPanel BackGound;
+	private JPanel backGound;
 	MediaTracker tracker;
-	public ImageIcon[] skins = new ImageIcon[2];
+	public ImageIcon[] skins = new ImageIcon[3];
 	public float Vector2[] = new float[2];
 
-	public int fps = 20;
+	public int fps = 30;
 
 	MyClient mc;
 
 	Dimension dr;
 
 	boolean loginFlag = false;
+
+	int planktonSize = 10;
 
 	/**
 	 * Launch the application.
@@ -92,8 +95,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.y += p.posY;
 
 			mc.Search(p);
-
-			mc.SendMyPlanariaData(p);
 		}
 
 		try {
@@ -105,7 +106,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.x *= -1;
 			centerPoint.y *= -1;
 			panel.setLocation(centerPoint);
-			BackGound.setLocation(centerPoint);
+			backGound.setLocation(centerPoint);
 		} catch (ArithmeticException e) {
 
 		}
@@ -143,6 +144,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	 */
 	public Drow() {
 		tracker = new MediaTracker(this);
+		ImportSkins();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1024, 640);
@@ -157,7 +159,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
 		dr = contentPane.getSize();
-		skins[0] = new ImageIcon("mizuumi.png");
 
 		panel = new JPanel();
 		panel.setBounds(0, 0, 2000, 2000);
@@ -165,17 +166,22 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		contentPane.add(panel);
 		panel.setLayout(null);
 
-		skins[1] = new ImageIcon("planaria.png");
-
-		BackGound = new JPanel();
-		BackGound.setBounds(0, 0, 2000, 2000);
-		contentPane.add(BackGound);
+		backGound = new JPanel();
+		backGound.setBounds(0, 0, 2000, 2000);
+		contentPane.add(backGound);
 
 		JLabel backGoundLabel = new JLabel(ResizeIcon(0, 2000));
-		BackGound.add(backGoundLabel);
+		backGound.add(backGoundLabel);
 
 		DrowThread dt = new DrowThread();
 		dt.start();
+	}
+
+	private void ImportSkins() {
+		skins[0] = new ImageIcon("mizuumi.png");
+		skins[1] = new ImageIcon("planaria.png");
+		skins[2] = new ImageIcon("plankton.png");
+		skins[2] = ResizeIcon(2, planktonSize);
 	}
 
 	Point current;
@@ -223,7 +229,27 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		return planaria;
 	}
 
+	Random random = new Random();
+	Dimension panelSize = panel.getSize();
+
+	public Plankton PopPlankton() {
+		return PopPlankton(-1);
+	}
+
+	public Plankton PopPlankton(int id) {
+		Plankton plankton = new Plankton(skins[2], random.nextInt(panelSize.width), random.nextInt(panelSize.height),
+				planktonSize, id);
+		plankton.setBounds(20, 20, planktonSize, planktonSize);
+
+		panel.add(plankton);
+
+		return plankton;
+	}
+
 	public void Delete(Planaria p) {
+		if (p == null) {
+			return;
+		}
 		panel.remove(p);
 		System.out.println("Delete : " + p.localId);
 		p = null;
@@ -234,6 +260,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
 
 		for (Planaria planaria : tmp) {
+			if (planaria.size < 30) {
+				continue;
+			}
+
 			Planaria child = Create(planaria.skin, planaria.posX, planaria.posY, planaria.size / 2);
 			child.setData(planaria.posX + (int) (Vector2[0] * 100), planaria.posY + (int) (Vector2[1] * 100), -1);
 			planaria.setData(-1, -1, planaria.size / 2);
@@ -267,7 +297,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-
+		PopPlankton();
 	}
 
 	@Override

@@ -1,19 +1,15 @@
 package planario;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 
-public class Planaria extends JLabel {
+public class Planaria extends CanEatObj {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
-	int posX, posY;
-	int size = 99;
 	static int id;
-	int localId;
 	int skin;
 	int speed;
 

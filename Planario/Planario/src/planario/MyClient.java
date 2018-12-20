@@ -49,6 +49,9 @@ public class MyClient extends JFrame {
 
 		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
 		mrt.start();// スレッドを動かす（Runが動く）
+
+		MesgSendThread mst = new MesgSendThread(this);
+		mst.start();
 	}
 
 	// メッセージ受信のためのスレッド
@@ -113,6 +116,10 @@ public class MyClient extends JFrame {
 						break;
 					}
 
+					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
+						// GameOver
+
+					}
 				}
 				socket.close();
 			} catch (IOException e) {

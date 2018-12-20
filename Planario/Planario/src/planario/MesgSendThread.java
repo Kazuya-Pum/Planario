@@ -18,7 +18,7 @@ public class MesgSendThread extends Thread {
 				for (Planaria p : tmp) {
 					mc.SendMyPlanariaData(p);
 				}
-				sleep(40);
+				sleep(30);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
