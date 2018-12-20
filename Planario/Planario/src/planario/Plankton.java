@@ -14,10 +14,14 @@ public class Plankton extends CanEatObj {
 		super(icon);
 		this.size = size;
 
+		this.posX = posX;
+		this.posY = posY;
+
 		if (id != -1) {
 			this.localId = id;
+			Plankton.id = id;
 		} else {
-			this.localId = Planaria.id++;
+			this.localId = ++Planaria.id;
 		}
 	}
 

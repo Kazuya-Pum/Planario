@@ -4,6 +4,7 @@ import java.net.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.io.*;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ public class MyClient extends JFrame {
 	Map<Integer, PlayerData> playerData = new HashMap<Integer, PlayerData>();
 	int myNumberInt;
 	Drow drow;
+	int planktonSize = 10;
+	PlayerData planktons;
 
 	public MyClient() {
 		// 名前の入力ダイアログを開く
@@ -46,6 +49,9 @@ public class MyClient extends JFrame {
 		} catch (IOException e) {
 			System.err.println("エラーが発生しました: " + e);
 		}
+
+		playerData.put(0, new PlayerData(0));
+		planktons = GetPlayer(0);
 
 		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
 		mrt.start();// スレッドを動かす（Runが動く）
@@ -109,6 +115,10 @@ public class MyClient extends JFrame {
 						case "Disconnect":
 							Disconnect(Integer.parseInt(inputTokens[1]));
 							break;
+						case "Pop":
+							Pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
+									Integer.parseInt(inputTokens[3]));
+							break;
 						default:
 							break;
 						}
@@ -117,7 +127,7 @@ public class MyClient extends JFrame {
 					}
 
 					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
-						// GameOver
+						// TODO GameOver
 
 					}
 				}
@@ -134,7 +144,6 @@ public class MyClient extends JFrame {
 			myNumberStr = br.readLine();
 			return Integer.parseInt(myNumberStr);
 		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
 			return GetMyNumber(br);
@@ -149,12 +158,48 @@ public class MyClient extends JFrame {
 			PlayerData player = GetPlayer(userID);
 
 			if (player.planariaData.containsKey(planariaID)) {
-				player.planariaData.get(planariaID).setData(posX, posY, size);
+				((Planaria) player.planariaData.get(planariaID)).setData(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
 				drow.Create(player.skin, posX, posY, size, userID, planariaID);
 			}
 		}
+	}
+
+
+
+	public void Pop(int planktonID, int posX, int posY) {
+		if (!planktons.planariaData.containsKey(planktonID)) {
+			planktons.planariaData.put(planktonID, drow.PopPlankton(posX, posY, planktonID));
+		}
+	}
+
+	Random random = new Random();
+
+	public void Pop() {
+		Plankton plankton = drow.PopPlankton(random.nextInt(drow.panelSize.width),
+				random.nextInt(drow.panelSize.height));
+		planktons.planariaData.put(plankton.localId, plankton);
+
+		SendPlanktonData(plankton);
+	}
+
+	public void LoadPlankton() {
+		Collection<CanEatObj> tmp = planktons.planariaData.values();
+		for (CanEatObj p : tmp) {
+			SendPlanktonData(p);
+		}
+	}
+
+	private void SendPlanktonData(CanEatObj p) {
+		StringBuilder buf = new StringBuilder();
+		buf.append("Pop ");
+		buf.append(p.localId);
+		buf.append(" ");
+		buf.append(p.posX);
+		buf.append(" ");
+		buf.append(p.posY);
+		SendMessage(buf.toString());
 	}
 
 	public PlayerData GetPlayer(int userID) {
@@ -180,12 +225,13 @@ public class MyClient extends JFrame {
 	public PlayerData Join(int ID) {
 		PlayerData p = new PlayerData(ID);
 		playerData.put(ID, p);
+		LoadPlankton();
 		return p;
 	}
 
 	public void Disconnect(int userID) {
-		Collection<Planaria> tmp = GetPlayer(userID).planariaData.values();
-		for (Planaria p : tmp) {
+		Collection<CanEatObj> tmp = GetPlayer(userID).planariaData.values();
+		for (CanEatObj p : tmp) {
 			drow.Delete(p);
 			p = null;
 		}
@@ -216,10 +262,19 @@ public class MyClient extends JFrame {
 		SendMessage(buf.toString());
 	}
 
+	PlayerData[] tmpPlayer;
+	CanEatObj[] tmpObj;
+
 	public void Search(Planaria p) {
 
-		for (PlayerData player : playerData.values()) {
-			for (Planaria planaria : player.planariaData.values()) {
+		tmpPlayer = new PlayerData[playerData.size()];
+		playerData.values().toArray(tmpPlayer);
+
+		for (PlayerData player : tmpPlayer) {
+
+			tmpObj = new CanEatObj[player.planariaData.size()];
+			player.planariaData.values().toArray(tmpObj);
+			for (CanEatObj planaria : tmpObj) {
 				if (planaria == p) {
 					continue;
 				}
@@ -233,8 +288,9 @@ public class MyClient extends JFrame {
 	}
 
 	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
-		myPlanaria.size += size;
+		myPlanaria.setData(-1, -1, myPlanaria.size + size);
 		SendMessage("Delete " + userID + " " + planariaID);
+		Delete(userID, planariaID);
 	}
 
 	public static void main(String[] args) {

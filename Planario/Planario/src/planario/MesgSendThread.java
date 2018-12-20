@@ -1,6 +1,5 @@
 package planario;
 
-// TODO 送信部を別スレッドにする場合はこれを使う
 public class MesgSendThread extends Thread {
 	MyClient mc;
 

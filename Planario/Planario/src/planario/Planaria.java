@@ -36,7 +36,7 @@ public class Planaria extends CanEatObj {
 		}
 		if (size > 0) {
 			this.size = size;
-			speed = 100 / size;
+			speed = (100 / size >= 1) ? 100 / size : 1;
 		}
 	}
 }
