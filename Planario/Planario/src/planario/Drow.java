@@ -178,15 +178,20 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		dt.start();
 	}
 
+	Point current;
+	Point next;
+	int currentSize;
+
 	private void Update(Planaria planaria) {
-		Point current = planaria.getLocation();
-		Point next = new Point();
+		current = planaria.getLocation();
+		next = new Point();
 
-		next.x = (int) (current.x + (planaria.posX - current.x) * 0.25);
-		next.y = (int) (current.y + (planaria.posY - current.y) * 0.25);
+		next.x = Lerp(current.x, planaria.posX, 0.25f);
+		next.y = Lerp(current.y, planaria.posY, 0.25f);
 
-		if (planaria.getIcon().getIconWidth() != planaria.size) {
-			planaria.setIcon(ResizeIcon(planaria.skin, planaria.size));
+		currentSize = planaria.getIcon().getIconWidth();
+		if (currentSize != planaria.size) {
+			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, planaria.size, 0.6f)));
 		}
 
 		planaria.setBounds(next.x, next.y, planaria.size, planaria.size);
@@ -240,6 +245,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 		vector[0] *= 5 / mag;
 		vector[1] *= 5 / mag;
+	}
+
+	private int Lerp(int start, int end, float t) {
+		return (int) (start + (end - start) * t);
 	}
 
 	@Override
