@@ -209,6 +209,27 @@ public class MyClient extends JFrame {
 		SendMessage(buf.toString());
 	}
 
+	public void Search(Planaria p) {
+
+		for (PlayerData player : playerData.values()) {
+			for (Planaria planaria : player.planariaData.values()) {
+				if (planaria == p) {
+					continue;
+				}
+
+				if (Math.abs(planaria.posX - p.posX) <= p.size / 3 && Math.abs(planaria.posY - p.posY) <= p.size / 3
+						&& planaria.size < p.size) {
+					Eat(p, player.playerID, planaria.localId, planaria.size);
+				}
+			}
+		}
+	}
+
+	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
+		myPlanaria.size += size;
+		SendMessage("Delete " + userID + " " + planariaID);
+	}
+
 	public static void main(String[] args) {
 		new MyClient();
 	}

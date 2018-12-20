@@ -91,6 +91,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.x += p.posX;
 			centerPoint.y += p.posY;
 
+			mc.Search(p);
+
 			mc.SendMyPlanariaData(p);
 		}
 
@@ -126,9 +128,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-	public Drow(MyClient mc_) {
+	public Drow(MyClient mc) {
 		this();
-		this.mc = mc_;
+		this.mc = mc;
 	}
 
 	public void Login() {
@@ -256,7 +258,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		Delete(mc.GetPlayer(mc.myNumberInt).planariaData.get(0));
+
 	}
 
 	@Override
