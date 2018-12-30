@@ -1,21 +1,17 @@
 package planario;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 
-public class Planaria extends JLabel {
+public class Planaria extends CanEatObj {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
-	int posX, posY;
-	int size = 99;
 	static int id;
-	int localId;
 	int skin;
-	int speed;
+	float speed;
 
 	public Planaria(ImageIcon icon, int skin, int posX, int posY, int size, int id) {
 		super(icon);
@@ -40,7 +36,7 @@ public class Planaria extends JLabel {
 		}
 		if (size > 0) {
 			this.size = size;
-			speed = 100 / size;
+			speed = 1 + 500 / size;
 		}
 	}
 }

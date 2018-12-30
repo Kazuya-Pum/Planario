@@ -12,6 +12,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Random;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,12 +24,12 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JPanel panel;
-	private JPanel BackGound;
+	private JPanel backGound;
 	MediaTracker tracker;
-	public ImageIcon[] skins = new ImageIcon[2];
+	public ImageIcon[] skins = new ImageIcon[3];
 	public float Vector2[] = new float[2];
 
-	public int fps = 20;
+	public int fps = 30;
 
 	MyClient mc;
 
@@ -36,6 +37,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	boolean loginFlag = false;
 
+	Random random = new Random();
 	/**
 	 * Launch the application.
 	 */
@@ -70,6 +72,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 					MyUpdate();
 					OtherUpdate();
 
+					if (random.nextInt(10) == 0) {
+						mc.Pop();
+					}
+
 					repaint();
 					sleep(fps);
 				} catch (InterruptedException e) {
@@ -91,18 +97,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.x += p.posX;
 			centerPoint.y += p.posY;
 
-			StringBuilder buf = new StringBuilder();
-			buf.append("Update ");
-			buf.append(mc.myNumberInt);
-			buf.append(" ");
-			buf.append(p.localId);
-			buf.append(" ");
-			buf.append(p.posX);
-			buf.append(" ");
-			buf.append(p.posY);
-			buf.append(" ");
-			buf.append(p.size);
-			mc.SendMessage(buf.toString());
+			mc.Search(p);
 		}
 
 		try {
@@ -114,7 +109,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.x *= -1;
 			centerPoint.y *= -1;
 			panel.setLocation(centerPoint);
-			BackGound.setLocation(centerPoint);
+			backGound.setLocation(centerPoint);
 		} catch (ArithmeticException e) {
 
 		}
@@ -125,7 +120,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.playerData.values().toArray(tmpPlayer);
 
 		for (PlayerData player : tmpPlayer) {
-			if (player.playerID == mc.myNumberInt) {
+			if (player.playerID == mc.myNumberInt || player.playerID == 0) {
 				continue;
 			}
 
@@ -137,9 +132,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-	public Drow(MyClient mc_) {
-		this();
-		this.mc = mc_;
+	public Drow() {
+		this(new MyClient());
 	}
 
 	public void Login() {
@@ -150,8 +144,11 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	/**
 	 * Create the frame.
 	 */
-	public Drow() {
+	public Drow(MyClient mc) {
+		this.mc = mc;
+
 		tracker = new MediaTracker(this);
+		ImportSkins();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1024, 640);
@@ -166,39 +163,52 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
 		dr = contentPane.getSize();
-		skins[0] = new ImageIcon("mizuumi.png");
 
 		panel = new JPanel();
-		panel.setBounds(0, 0, 2000, 2000);
+		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		panel.setOpaque(false);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
-		skins[1] = new ImageIcon("planaria.png");
+		backGound = new JPanel();
+		backGound.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
+		contentPane.add(backGound);
 
-		BackGound = new JPanel();
-		BackGound.setBounds(0, 0, 2000, 2000);
-		contentPane.add(BackGound);
-
-		JLabel backGoundLabel = new JLabel(ResizeIcon(0, 2000));
-		BackGound.add(backGoundLabel);
+		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
+		backGound.add(backGoundLabel);
 
 		DrowThread dt = new DrowThread();
 		dt.start();
 	}
 
+	private void ImportSkins() {
+		skins[0] = new ImageIcon("mizuumi.png");
+		skins[1] = new ImageIcon("planaria.png");
+		skins[2] = new ImageIcon("plankton.png");
+		skins[2] = ResizeIcon(2, 10);
+	}
+
+	Point current;
+	Point next;
+	int currentSize;
+
 	private void Update(Planaria planaria) {
-		Point current = planaria.getLocation();
-		Point next = new Point();
+		current = planaria.getLocation();
+		next = new Point();
 
-		next.x = (int) (current.x + (planaria.posX - current.x) * 0.25);
-		next.y = (int) (current.y + (planaria.posY - current.y) * 0.25);
+		planaria.posX = (planaria.posX > mc.fieldSize) ? mc.fieldSize : planaria.posX;
+		planaria.posY = (planaria.posY > mc.fieldSize) ? mc.fieldSize : planaria.posY;
 
-		if (planaria.getIcon().getIconWidth() != planaria.size) {
-			planaria.setIcon(ResizeIcon(planaria.skin, planaria.size));
+		next.x = Lerp(current.x, planaria.posX, 0.25f);
+		next.y = Lerp(current.y, planaria.posY, 0.25f);
+
+		currentSize = planaria.getIcon().getIconWidth();
+		int size = planaria.size / 3;
+		if (currentSize != size) {
+			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, size, 0.6f)));
 		}
 
-		planaria.setBounds(next.x, next.y, planaria.size, planaria.size);
+		planaria.setBounds(next.x, next.y, size, size);
 	}
 
 	private ImageIcon ResizeIcon(int icon, int size) {
@@ -227,10 +237,24 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		return planaria;
 	}
 
-	public void Delete(Planaria p) {
+	public Plankton PopPlankton(int x, int y) {
+		return PopPlankton(x, y, -1);
+	}
+
+	public Plankton PopPlankton(int x, int y, int id) {
+		Plankton plankton = new Plankton(skins[2], x, y, mc.planktonSize, id);
+		plankton.setBounds(x, y, mc.planktonSize, mc.planktonSize);
+
+		panel.add(plankton);
+
+		return plankton;
+	}
+
+	public void Delete(CanEatObj p) {
+		if (p == null) {
+			return;
+		}
 		panel.remove(p);
-		System.out.println("Delete : " + p.localId);
-		p = null;
 	}
 
 	private void Spilit() {
@@ -238,6 +262,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
 
 		for (Planaria planaria : tmp) {
+			if (planaria.size / 3 < 30) {
+				continue;
+			}
+
 			Planaria child = Create(planaria.skin, planaria.posX, planaria.posY, planaria.size / 2);
 			child.setData(planaria.posX + (int) (Vector2[0] * 100), planaria.posY + (int) (Vector2[1] * 100), -1);
 			planaria.setData(-1, -1, planaria.size / 2);
@@ -247,13 +275,22 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private void normalize(float[] vector) {
 		double mag = Math.hypot(vector[0], vector[1]);
 
-		vector[0] *= 5 / mag;
-		vector[1] *= 5 / mag;
+		vector[0] *= 1 / mag;
+		vector[1] *= 1 / mag;
+	}
+
+	private int Lerp(int from, int to, float t) {
+		boolean positive = from < to;
+
+		int value = (int) Math.ceil(Math.abs(to - from) * t);
+
+		value *= (positive) ? 1 : -1;
+
+		return from + value;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
@@ -267,7 +304,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		Delete(mc.GetPlayer(mc.myNumberInt).planariaData.get(0));
+
 	}
 
 	@Override
