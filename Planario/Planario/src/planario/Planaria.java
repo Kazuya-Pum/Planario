@@ -11,7 +11,7 @@ public class Planaria extends CanEatObj {
 
 	static int id;
 	int skin;
-	int speed;
+	float speed;
 
 	public Planaria(ImageIcon icon, int skin, int posX, int posY, int size, int id) {
 		super(icon);
@@ -36,7 +36,7 @@ public class Planaria extends CanEatObj {
 		}
 		if (size > 0) {
 			this.size = size;
-			speed = (100 / size >= 1) ? 100 / size : 1;
+			speed = 1 + 500 / size;
 		}
 	}
 }

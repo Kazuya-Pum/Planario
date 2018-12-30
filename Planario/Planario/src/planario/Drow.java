@@ -264,7 +264,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
 
 		for (Planaria planaria : tmp) {
-			if (planaria.size < 30) {
+			if (planaria.size / 3 < 30) {
 				continue;
 			}
 
@@ -277,8 +277,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private void normalize(float[] vector) {
 		double mag = Math.hypot(vector[0], vector[1]);
 
-		vector[0] *= 10 / mag;
-		vector[1] *= 10 / mag;
+		vector[0] *= 1 / mag;
+		vector[1] *= 1 / mag;
 	}
 
 	private int Lerp(int from, int to, float t) {
