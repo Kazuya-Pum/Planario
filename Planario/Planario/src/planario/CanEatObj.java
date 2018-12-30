@@ -19,4 +19,8 @@ public abstract class CanEatObj extends JLabel {
 		super(icon);
 	}
 
+	public void setBounds(int x, int y, int width, int height) {
+		super.setBounds(x - (width / 8), y - (height / 8), width, height);
+	}
+
 }

@@ -38,8 +38,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	boolean loginFlag = false;
 
 	Random random = new Random();
-	Dimension panelSize;
-
 	/**
 	 * Launch the application.
 	 */
@@ -74,7 +72,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 					MyUpdate();
 					OtherUpdate();
 
-					if(random.nextInt(10) == 0) {
+					if (random.nextInt(10) == 0) {
 						mc.Pop();
 					}
 
@@ -134,9 +132,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-	public Drow(MyClient mc) {
-		this();
-		this.mc = mc;
+	public Drow() {
+		this(new MyClient());
 	}
 
 	public void Login() {
@@ -147,7 +144,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	/**
 	 * Create the frame.
 	 */
-	public Drow() {
+	public Drow(MyClient mc) {
+		this.mc = mc;
+
 		tracker = new MediaTracker(this);
 		ImportSkins();
 
@@ -166,18 +165,16 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		dr = contentPane.getSize();
 
 		panel = new JPanel();
-		panel.setBounds(0, 0, 2000, 2000);
+		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		panel.setOpaque(false);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
-		panelSize = panel.getSize();
-
 		backGound = new JPanel();
-		backGound.setBounds(0, 0, 2000, 2000);
+		backGound.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		contentPane.add(backGound);
 
-		JLabel backGoundLabel = new JLabel(ResizeIcon(0, 2000));
+		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
 		backGound.add(backGoundLabel);
 
 		DrowThread dt = new DrowThread();
@@ -199,16 +196,19 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		current = planaria.getLocation();
 		next = new Point();
 
+		planaria.posX = (planaria.posX > mc.fieldSize) ? mc.fieldSize : planaria.posX;
+		planaria.posY = (planaria.posY > mc.fieldSize) ? mc.fieldSize : planaria.posY;
+
 		next.x = Lerp(current.x, planaria.posX, 0.25f);
 		next.y = Lerp(current.y, planaria.posY, 0.25f);
 
 		currentSize = planaria.getIcon().getIconWidth();
-		if (currentSize != planaria.size) {
-			planaria.setIcon(ResizeIcon(planaria.skin,planaria.size));
-//			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, planaria.size, 0.6f)));
+		int size = planaria.size / 3;
+		if (currentSize != size) {
+			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, size, 0.6f)));
 		}
 
-		planaria.setBounds(next.x, next.y, planaria.size, planaria.size);
+		planaria.setBounds(next.x, next.y, size, size);
 	}
 
 	private ImageIcon ResizeIcon(int icon, int size) {
@@ -281,13 +281,18 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		vector[1] *= 10 / mag;
 	}
 
-	private int Lerp(int start, int end, float t) {
-		return (int) (start + (end - start) * t);
+	private int Lerp(int from, int to, float t) {
+		boolean positive = from < to;
+
+		int value = (int) Math.ceil(Math.abs(to - from) * t);
+
+		value *= (positive) ? 1 : -1;
+
+		return from + value;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 

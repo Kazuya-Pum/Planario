@@ -21,6 +21,7 @@ public class MyClient extends JFrame {
 	Drow drow;
 	int planktonSize = 10;
 	PlayerData planktons;
+	int fieldSize = 4000;
 
 	public MyClient() {
 		// 名前の入力ダイアログを開く
@@ -166,8 +167,6 @@ public class MyClient extends JFrame {
 		}
 	}
 
-
-
 	public void Pop(int planktonID, int posX, int posY) {
 		if (!planktons.planariaData.containsKey(planktonID)) {
 			planktons.planariaData.put(planktonID, drow.PopPlankton(posX, posY, planktonID));
@@ -177,8 +176,7 @@ public class MyClient extends JFrame {
 	Random random = new Random();
 
 	public void Pop() {
-		Plankton plankton = drow.PopPlankton(random.nextInt(drow.panelSize.width),
-				random.nextInt(drow.panelSize.height));
+		Plankton plankton = drow.PopPlankton(random.nextInt(fieldSize), random.nextInt(fieldSize));
 		planktons.planariaData.put(plankton.localId, plankton);
 
 		SendPlanktonData(plankton);
@@ -271,7 +269,6 @@ public class MyClient extends JFrame {
 		playerData.values().toArray(tmpPlayer);
 
 		for (PlayerData player : tmpPlayer) {
-
 			tmpObj = new CanEatObj[player.planariaData.size()];
 			player.planariaData.values().toArray(tmpObj);
 			for (CanEatObj planaria : tmpObj) {
@@ -279,7 +276,7 @@ public class MyClient extends JFrame {
 					continue;
 				}
 
-				if (Math.abs(planaria.posX - p.posX) <= p.size / 3 && Math.abs(planaria.posY - p.posY) <= p.size / 3
+				if (Math.hypot(planaria.posX - p.posX, planaria.posY - p.posY) <= p.size / 9
 						&& planaria.size < p.size) {
 					Eat(p, player.playerID, planaria.localId, planaria.size);
 				}
