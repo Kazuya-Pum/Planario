@@ -255,8 +255,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			return;
 		}
 		panel.remove(p);
-		System.out.println("Delete : " + p.localId);
-		p = null;
 	}
 
 	private void Spilit() {
