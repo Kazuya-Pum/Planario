@@ -38,6 +38,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	boolean loginFlag = false;
 
 	Random random = new Random();
+
 	/**
 	 * Launch the application.
 	 */
@@ -93,7 +94,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
 		for (Planaria p : tmp) {
 			p.setData(p.posX + (int) (Vector2[0] * p.speed), p.posY + (int) (Vector2[1] * p.speed), -1);
-			Update(p);
+			posUpdate(p);
 			centerPoint.x += p.posX;
 			centerPoint.y += p.posY;
 
@@ -120,7 +121,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		mc.playerData.values().toArray(tmpPlayer);
 
 		for (PlayerData player : tmpPlayer) {
-			if (player.playerID == mc.myNumberInt || player.playerID == 0) {
+			if (player.playerID == 0) {
 				continue;
 			}
 
@@ -188,27 +189,28 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		skins[2] = ResizeIcon(2, 10);
 	}
 
-	Point current;
-	Point next;
-	int currentSize;
+	private int currentSize;
+	private int size;
+	private int iconSize;
 
 	private void Update(Planaria planaria) {
-		current = planaria.getLocation();
-		next = new Point();
+		currentSize = planaria.getIcon().getIconWidth();
+		size = planaria.size / 3;
+		iconSize = size;
+		if (currentSize != size) {
+			iconSize = Lerp(currentSize, size, 0.6f);
+			planaria.setIcon(ResizeIcon(planaria.skin, iconSize));
+		}
 
+		planaria.setBounds(planaria.current.x, planaria.current.y, iconSize, iconSize);
+	}
+
+	private void posUpdate(Planaria planaria) {
 		planaria.posX = (planaria.posX > mc.fieldSize) ? mc.fieldSize : planaria.posX;
 		planaria.posY = (planaria.posY > mc.fieldSize) ? mc.fieldSize : planaria.posY;
 
-		next.x = Lerp(current.x, planaria.posX, 0.25f);
-		next.y = Lerp(current.y, planaria.posY, 0.25f);
-
-		currentSize = planaria.getIcon().getIconWidth();
-		int size = planaria.size / 3;
-		if (currentSize != size) {
-			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, size, 0.6f)));
-		}
-
-		planaria.setBounds(next.x, next.y, size, size);
+		planaria.current.x = Lerp(planaria.current.x, planaria.posX, 0.25f);
+		planaria.current.y = Lerp(planaria.current.y, planaria.posY, 0.25f);
 	}
 
 	private ImageIcon ResizeIcon(int icon, int size) {
@@ -266,17 +268,23 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 				continue;
 			}
 
-			Planaria child = Create(planaria.skin, planaria.posX, planaria.posY, planaria.size / 2);
-			child.setData(planaria.posX + (int) (Vector2[0] * 100), planaria.posY + (int) (Vector2[1] * 100), -1);
+			Planaria child = Create(planaria.skin, planaria.posX + (int) (Vector2[0] * 100),
+					planaria.posY + (int) (Vector2[1] * 100), planaria.size / 2);
+			child.setBounds(planaria.posX, planaria.posY, child.size, child.size);
 			planaria.setData(-1, -1, planaria.size / 2);
 		}
 	}
 
-	private void normalize(float[] vector) {
+
+	private float[] normalize(float[] vector) {
 		double mag = Math.hypot(vector[0], vector[1]);
 
-		vector[0] *= 1 / mag;
-		vector[1] *= 1 / mag;
+		double dist = (mag > 100) ? 1 : mag / 100;
+
+		vector[0] *= dist / mag;
+		vector[1] *= dist / mag;
+
+		return vector;
 	}
 
 	private int Lerp(int from, int to, float t) {
@@ -294,12 +302,14 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	}
 
+	private float[] mouse = new float[2];
+
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		Vector2[0] = e.getPoint().x - dr.width / 2;
-		Vector2[1] = e.getPoint().y - dr.height / 2;
+		mouse[0] = e.getPoint().x - dr.width / 2;
+		mouse[1] = e.getPoint().y - dr.height / 2;
 
-		normalize(Vector2);
+		Vector2 = normalize(mouse);
 	}
 
 	@Override
@@ -309,37 +319,31 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
@@ -350,7 +354,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
@@ -363,13 +366,11 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 
 	}
 }

@@ -9,11 +9,7 @@ import java.io.*;
 
 import javax.swing.*;
 
-public class MyClient extends JFrame {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+public class MyClient {
 	PrintWriter out;// 出力用のライター
 
 	Map<Integer, PlayerData> playerData = new HashMap<Integer, PlayerData>();
@@ -159,7 +155,7 @@ public class MyClient extends JFrame {
 			PlayerData player = GetPlayer(userID);
 
 			if (player.planariaData.containsKey(planariaID)) {
-				((Planaria) player.planariaData.get(planariaID)).setData(posX, posY, size);
+				((Planaria) player.planariaData.get(planariaID)).setCurrent(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
 				drow.Create(player.skin, posX, posY, size, userID, planariaID);
@@ -194,9 +190,9 @@ public class MyClient extends JFrame {
 		buf.append("Pop ");
 		buf.append(p.localId);
 		buf.append(" ");
-		buf.append(p.posX);
+		buf.append(p.current.x);
 		buf.append(" ");
-		buf.append(p.posY);
+		buf.append(p.current.y);
 		SendMessage(buf.toString());
 	}
 
@@ -252,9 +248,9 @@ public class MyClient extends JFrame {
 		buf.append(" ");
 		buf.append(p.localId);
 		buf.append(" ");
-		buf.append(p.posX);
+		buf.append(p.current.x);
 		buf.append(" ");
-		buf.append(p.posY);
+		buf.append(p.current.y);
 		buf.append(" ");
 		buf.append(p.size);
 		SendMessage(buf.toString());
@@ -276,7 +272,7 @@ public class MyClient extends JFrame {
 					continue;
 				}
 
-				if (Math.hypot(planaria.posX - p.posX, planaria.posY - p.posY) <= p.size / 9
+				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 9
 						&& planaria.size < p.size) {
 					Eat(p, player.playerID, planaria.localId, planaria.size);
 				}

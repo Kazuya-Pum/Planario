@@ -8,20 +8,16 @@ public class Plankton extends CanEatObj {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	static int id;
+	private static int id;
 
 	public Plankton(ImageIcon icon, int posX, int posY, int size, int id) {
-		super(icon);
-		this.size = size;
-
-		this.posX = posX;
-		this.posY = posY;
+		super(icon, posX, posY, size);
 
 		if (id != -1) {
 			this.localId = id;
 			Plankton.id = id;
 		} else {
-			this.localId = ++Planaria.id;
+			this.localId = ++Plankton.id;
 		}
 	}
 
