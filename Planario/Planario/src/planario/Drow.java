@@ -27,7 +27,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private JPanel backGound;
 	MediaTracker tracker;
 	public ImageIcon[] skins = new ImageIcon[3];
-	public float Vector2[] = new float[2];
+	public double Vector2[] = new double[2];
 
 	public int fps = 30;
 
@@ -38,6 +38,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	boolean loginFlag = false;
 
 	Random random = new Random();
+
+	private Point mouse = new Point();
 
 	/**
 	 * Launch the application.
@@ -86,17 +88,23 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
+	Point centerPoint = new Point();
+	Point prevCenter = new Point();
+
 	private void MyUpdate() {
-		Point centerPoint = new Point();
+		centerPoint.x = 0;
+		centerPoint.y = 0;
 
 		int count = mc.GetPlayer(mc.myNumberInt).planariaData.size();
 		Planaria[] tmp = new Planaria[count];
 		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
 		for (Planaria p : tmp) {
+			normalize(mouse.x - prevCenter.x - p.current.x, mouse.y - prevCenter.y - p.current.y);
+
 			p.setData(p.posX + (int) (Vector2[0] * p.speed), p.posY + (int) (Vector2[1] * p.speed), -1);
 			posUpdate(p);
-			centerPoint.x += p.posX;
-			centerPoint.y += p.posY;
+			centerPoint.x += p.current.x;
+			centerPoint.y += p.current.y;
 
 			mc.Search(p);
 		}
@@ -111,6 +119,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.y *= -1;
 			panel.setLocation(centerPoint);
 			backGound.setLocation(centerPoint);
+
+			prevCenter.x = centerPoint.x;
+			prevCenter.y = centerPoint.y;
+
 		} catch (ArithmeticException e) {
 
 		}
@@ -275,16 +287,13 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-
-	private float[] normalize(float[] vector) {
-		double mag = Math.hypot(vector[0], vector[1]);
+	private void normalize(int x, int y) {
+		double mag = Math.hypot(x, y);
 
 		double dist = (mag > 100) ? 1 : mag / 100;
 
-		vector[0] *= dist / mag;
-		vector[1] *= dist / mag;
-
-		return vector;
+		Vector2[0] = x * dist / mag;
+		Vector2[1] = y * dist / mag;
 	}
 
 	private int Lerp(int from, int to, float t) {
@@ -302,14 +311,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	}
 
-	private float[] mouse = new float[2];
-
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		mouse[0] = e.getPoint().x - dr.width / 2;
-		mouse[1] = e.getPoint().y - dr.height / 2;
-
-		Vector2 = normalize(mouse);
+		mouse = e.getPoint();
 	}
 
 	@Override
