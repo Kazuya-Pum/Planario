@@ -20,6 +20,8 @@ public class MyClient {
 	int fieldSize = 4000;
 
 	public MyClient() {
+		drow = new Drow(this);
+		drow.setVisible(true);
 		// 名前の入力ダイアログを開く
 		String myName = JOptionPane.showInputDialog(null, "名前を入力してください", "名前の入力", JOptionPane.QUESTION_MESSAGE);
 		if (myName.equals("")) {
@@ -31,8 +33,6 @@ public class MyClient {
 			serverIP = "localhost";
 		}
 
-		drow = new Drow(this);
-		drow.setVisible(true);
 
 		// サーバに接続する
 		Socket socket = null;
@@ -125,7 +125,7 @@ public class MyClient {
 
 					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
 						// TODO GameOver
-
+						drow.toGameOver();
 					}
 				}
 				socket.close();

@@ -1,30 +1,22 @@
 package planario;
 
-import java.awt.Dimension;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Point;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.Random;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
 public class Drow extends JFrame implements MouseListener, MouseMotionListener, ComponentListener, KeyListener {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+	private JLayeredPane contentPane;
 	private JPanel panel;
 	private JPanel backGound;
+
+	public JPanel title;
+
 	MediaTracker tracker;
 	public ImageIcon[] skins = new ImageIcon[3];
 	public double Vector2[] = new double[2];
@@ -40,22 +32,6 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	Random random = new Random();
 
 	private Point mouse = new Point();
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Drow frame = new Drow();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	public class DrowThread extends Thread {
 		public void run() {
@@ -167,25 +143,31 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		setBounds(100, 100, 1024, 640);
 		setTitle("Planar.io");
 
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane = new JLayeredPane();
+//		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
+		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.addMouseListener(this);
 		contentPane.addMouseMotionListener(this);
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
 		dr = contentPane.getSize();
 
+		JLayeredPane field = new JLayeredPane();
+		contentPane.add(field);
+		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
+
 		panel = new JPanel();
 		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		panel.setOpaque(false);
-		contentPane.add(panel);
+		field.add(panel);
+		contentPane.setLayer(panel, JLayeredPane.DEFAULT_LAYER);
 		panel.setLayout(null);
 
 		backGound = new JPanel();
 		backGound.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
-		contentPane.add(backGound);
+		field.add(backGound);
+		contentPane.setLayer(backGound, JLayeredPane.DEFAULT_LAYER);
 
 		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
 		backGound.add(backGoundLabel);
@@ -306,6 +288,16 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		return from + value;
 	}
 
+	public void toGameOver() {
+		GameOverPanel gameOver = new GameOverPanel(dr.width,dr.height);
+		gameOver.setBounds(0, 0, dr.width, dr.height);
+		contentPane.add(gameOver, BorderLayout.CENTER);
+		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
+
+		repaint();
+		System.out.println("GameOver");
+	}
+
 	@Override
 	public void mouseDragged(MouseEvent e) {
 
@@ -318,7 +310,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-
+		toGameOver();//debug
 	}
 
 	@Override
