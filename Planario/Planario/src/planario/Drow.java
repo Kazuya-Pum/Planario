@@ -29,6 +29,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	boolean loginFlag = false;
 
+	int sizeRate = 3;
+
 	Random random = new Random();
 
 	private Point mouse = new Point();
@@ -126,7 +128,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public void Login() {
-		Create(1, 800, 500, 100);
+		Point spawnPoint = mc.searchSpawnPoint();
+
+		Create(1, spawnPoint.x, spawnPoint.y, mc.defualtSize);
 		loginFlag = true;
 	}
 
@@ -189,7 +193,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	private void Update(Planaria planaria) {
 		currentSize = planaria.getIcon().getIconWidth();
-		size = planaria.size / 3;
+		size = planaria.size / sizeRate;
 		iconSize = size;
 		if (currentSize != size) {
 			iconSize = Lerp(currentSize, size, 0.6f);
@@ -224,8 +228,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
-		Planaria planaria = new Planaria(ResizeIcon(skin, size), skin, x, y, size, planariaID);
-		planaria.setBounds(x, y, size, size);
+		Planaria planaria = new Planaria(ResizeIcon(skin, size / sizeRate), skin, x, y, size, planariaID);
+		planaria.setBounds(x, y, size / sizeRate, size / sizeRate);
 
 		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
 		panel.add(planaria);
@@ -289,13 +293,17 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public void toGameOver() {
-		GameOverPanel gameOver = new GameOverPanel(dr.width,dr.height);
+		GameOverPanel gameOver = new GameOverPanel(dr.width, dr.height);
 		gameOver.setBounds(0, 0, dr.width, dr.height);
 		contentPane.add(gameOver, BorderLayout.CENTER);
 		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
 
 		repaint();
 		System.out.println("GameOver");
+	}
+
+	public void reStart() {
+
 	}
 
 	@Override
@@ -310,7 +318,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		toGameOver();//debug
+		toGameOver();// debug
 	}
 
 	@Override

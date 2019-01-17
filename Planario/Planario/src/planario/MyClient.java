@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.awt.Point;
 import java.io.*;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ public class MyClient {
 	int myNumberInt;
 	Drow drow;
 	int planktonSize = 10;
+	int defualtSize = 100;
 	PlayerData planktons;
 	int fieldSize = 4000;
 
@@ -32,7 +34,6 @@ public class MyClient {
 		if (serverIP.equals("")) {
 			serverIP = "localhost";
 		}
-
 
 		// サーバに接続する
 		Socket socket = null;
@@ -284,6 +285,45 @@ public class MyClient {
 		myPlanaria.setData(-1, -1, myPlanaria.size + size);
 		SendMessage("Delete " + userID + " " + planariaID);
 		Delete(userID, planariaID);
+	}
+
+	public Point searchSpawnPoint() {
+		Random r = new Random();
+		tmpPlayer = new PlayerData[playerData.size()];
+		playerData.values().toArray(tmpPlayer);
+
+		int x, y;
+
+		while (true) {
+			x = r.nextInt(fieldSize);
+			y = r.nextInt(fieldSize);
+
+			if (canSpawn(tmpPlayer, x, y)) {
+				break;
+			}
+		}
+
+		return new Point(x, y);
+	}
+
+	private boolean canSpawn(PlayerData[] tmpPlayer, int x, int y) {
+
+		for (PlayerData player : tmpPlayer) {
+			if(player.playerID == 0) {
+				continue;
+			}
+			tmpObj = new CanEatObj[player.planariaData.size()];
+			player.planariaData.values().toArray(tmpObj);
+			for (CanEatObj planaria : tmpObj) {
+
+				if (Math.hypot(planaria.current.x - x, planaria.current.y - y) <= planaria.size / 9) {
+					return false;
+				}
+
+			}
+		}
+
+		return true;
 	}
 
 	public static void main(String[] args) {

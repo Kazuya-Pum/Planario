@@ -1,6 +1,5 @@
 package planario;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -27,7 +26,6 @@ public class GameOverPanel extends JPanel {
 		}
 		bfg = buffimg.createGraphics();
 		setOpaque(false);
-		setForeground(new Color(0,0,0,50));
 	}
 
 	@Override
