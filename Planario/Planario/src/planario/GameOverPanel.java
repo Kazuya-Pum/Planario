@@ -15,13 +15,16 @@ public class GameOverPanel extends JPanel {
 
 	public GameOverPanel(int width, int height) {
 		setPreferredSize(new Dimension(width, height));
-		buffimg = (BufferedImage) LoadManager.loadImage("res/GameOver.png");
+//		buffimg = (BufferedImage) LoadManager.loadImage("res/GameOver.png");
+
+		buffimg = LoadManager.getBuffImg("res/GameOver.png");
+
 //		try {
 //			buffimg = ImageIO.read(new File("res/GameOver.png"));
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
-		bfg = buffimg.createGraphics();
+//		bfg = buffimg.createGraphics();
 		setOpaque(false);
 	}
 

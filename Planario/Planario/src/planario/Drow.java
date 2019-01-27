@@ -32,6 +32,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	int sizeRate = 3;
 
+	boolean init = false;
+
 	Random random = new Random();
 
 	private Point mouse = new Point();
@@ -40,7 +42,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		public void run() {
 			try {
 				System.out.println("nowLoading");
-				while (!loginFlag) {
+				while (!loginFlag || !init) {
 					sleep(10);
 				}
 				System.out.println("ok");
@@ -145,7 +147,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		ImportSkins();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1024, 640);
+		setSize(1024, 640);
+		setLocationRelativeTo(null);
 		setTitle("Planar.io");
 
 		contentPane = new JLayeredPane();
@@ -155,7 +158,17 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		contentPane.addMouseMotionListener(this);
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
+
+
+
+		DrowThread dt = new DrowThread();
+		dt.start();
+	}
+
+	private void initialize() {
 		dr = contentPane.getSize();
+
+		System.out.println(contentPane.getSize());
 
 		TitlePanel title = new TitlePanel(mc, dr.width, dr.height);
 		title.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
@@ -164,7 +177,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 		borderPane = new JLayeredPane();
 		borderPane.setLayout(new BorderLayout(0, 0));
-		borderPane.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
+		borderPane.setSize(dr.width, dr.height);
 		contentPane.add(borderPane);
 		contentPane.setLayer(borderPane, JLayeredPane.DEFAULT_LAYER);
 
@@ -188,8 +201,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
 		backGound.add(backGoundLabel);
 
-		DrowThread dt = new DrowThread();
-		dt.start();
+		init = true;
 	}
 
 	private void ImportSkins() {
@@ -366,6 +378,10 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	@Override
 	public void componentResized(ComponentEvent e) {
 		dr = contentPane.getSize();
+
+		if(!init) {
+			initialize();
+		}
 	}
 
 	@Override

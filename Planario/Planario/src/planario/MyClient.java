@@ -27,7 +27,6 @@ public class MyClient {
 	public void Access(String serverIP) {
 		String myName = "";
 
-
 		if (serverIP.equals("")) {
 			serverIP = "localhost";
 		}
