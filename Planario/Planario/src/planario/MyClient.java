@@ -8,8 +8,6 @@ import java.util.Random;
 import java.awt.Point;
 import java.io.*;
 
-import javax.swing.*;
-
 public class MyClient {
 	PrintWriter out;// 出力用のライター
 
@@ -24,13 +22,12 @@ public class MyClient {
 	public MyClient() {
 		drow = new Drow(this);
 		drow.setVisible(true);
-		// 名前の入力ダイアログを開く
-		String myName = JOptionPane.showInputDialog(null, "名前を入力してください", "名前の入力", JOptionPane.QUESTION_MESSAGE);
-		if (myName.equals("")) {
-			myName = "No name";// 名前がないときは，"No name"とする
-		}
+	}
 
-		String serverIP = JOptionPane.showInputDialog(null, "サーバのＩＰアドレス", "IPアドレスの入力", JOptionPane.QUESTION_MESSAGE);
+	public void Access(String serverIP) {
+		String myName = "";
+
+
 		if (serverIP.equals("")) {
 			serverIP = "localhost";
 		}
@@ -56,6 +53,8 @@ public class MyClient {
 
 		MesgSendThread mst = new MesgSendThread(this);
 		mst.start();
+
+		drow.requestFocus();
 	}
 
 	// メッセージ受信のためのスレッド
@@ -125,8 +124,8 @@ public class MyClient {
 					}
 
 					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
-						// TODO GameOver
 						drow.toGameOver();
+						break;
 					}
 				}
 				socket.close();

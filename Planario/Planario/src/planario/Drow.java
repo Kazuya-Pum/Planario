@@ -14,6 +14,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	private JLayeredPane contentPane;
 	private JPanel panel;
 	private JPanel backGound;
+	private JLayeredPane borderPane;
 
 	public JPanel title;
 
@@ -148,30 +149,41 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		setTitle("Planar.io");
 
 		contentPane = new JLayeredPane();
-//		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.setLayout(null);
 		contentPane.addMouseListener(this);
 		contentPane.addMouseMotionListener(this);
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
 		dr = contentPane.getSize();
 
+		TitlePanel title = new TitlePanel(mc, dr.width, dr.height);
+		title.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
+		contentPane.add(title);
+		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
+
+		borderPane = new JLayeredPane();
+		borderPane.setLayout(new BorderLayout(0, 0));
+		borderPane.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
+		contentPane.add(borderPane);
+		contentPane.setLayer(borderPane, JLayeredPane.DEFAULT_LAYER);
+
 		JLayeredPane field = new JLayeredPane();
-		contentPane.add(field);
-		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
+		field.setLayout(null);
+		borderPane.add(field);
+		borderPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
 
 		panel = new JPanel();
 		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		panel.setOpaque(false);
 		field.add(panel);
-		contentPane.setLayer(panel, JLayeredPane.DEFAULT_LAYER);
+		field.setLayer(panel, JLayeredPane.PALETTE_LAYER);
 		panel.setLayout(null);
 
 		backGound = new JPanel();
 		backGound.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
 		field.add(backGound);
-		contentPane.setLayer(backGound, JLayeredPane.DEFAULT_LAYER);
+		field.setLayer(backGound, JLayeredPane.DEFAULT_LAYER);
 
 		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
 		backGound.add(backGoundLabel);
@@ -181,9 +193,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	private void ImportSkins() {
-		skins[0] = new ImageIcon("mizuumi.png");
-		skins[1] = new ImageIcon("planaria.png");
-		skins[2] = new ImageIcon("plankton.png");
+		skins[0] = new ImageIcon(LoadManager.loadImage("res/mizuumi.png"));
+		skins[1] = new ImageIcon(LoadManager.loadImage("res/planaria.png"));
+		skins[2] = new ImageIcon(LoadManager.loadImage("res/plankton.png"));
 		skins[2] = ResizeIcon(2, 10);
 	}
 
@@ -295,8 +307,8 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	public void toGameOver() {
 		GameOverPanel gameOver = new GameOverPanel(dr.width, dr.height);
 		gameOver.setBounds(0, 0, dr.width, dr.height);
-		contentPane.add(gameOver, BorderLayout.CENTER);
-		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
+		borderPane.add(gameOver, BorderLayout.CENTER);
+		borderPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
 
 		repaint();
 		System.out.println("GameOver");
@@ -318,7 +330,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		toGameOver();// debug
+
 	}
 
 	@Override
@@ -363,6 +375,7 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		System.out.println("a");
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 			Spilit();
 		}
