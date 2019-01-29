@@ -1,23 +1,28 @@
 package planario;
 
 import java.net.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.awt.Point;
 import java.io.*;
 
 public class MyClient {
 	PrintWriter out;// 出力用のライター
 
-	Map<Integer, PlayerData> playerData = new HashMap<Integer, PlayerData>();
+	ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
 	int myNumberInt;
 	Drow drow;
 	int planktonSize = 10;
 	int defualtSize = 100;
 	PlayerData planktons;
 	int fieldSize = 4000;
+	int score = 0;
+	boolean loginFlag = false;
+
+	MesgSendThread mst;
+
+	static boolean accessFlag = false;
 
 	public MyClient() {
 		drow = new Drow(this);
@@ -25,6 +30,7 @@ public class MyClient {
 	}
 
 	public void Access(String serverIP) {
+		accessFlag = true;
 		String myName = "";
 
 		if (serverIP.equals("")) {
@@ -38,10 +44,11 @@ public class MyClient {
 			// Address（"133.42.155.201"形式）に設定すると他のPCのサーバと通信できる
 			// 10000はポート番号．IP Addressで接続するPCを決めて，ポート番号でそのPC上動作するプログラムを特定する
 			socket = new Socket(serverIP, 10000);
-		} catch (UnknownHostException e) {
-			System.err.println("ホストの IP アドレスが判定できません: " + e);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("エラーが発生しました: " + e);
+			drow.title.setErrorMsg("サーバーに接続できません");
+			accessFlag = false;
+			return;
 		}
 
 		playerData.put(0, new PlayerData(0));
@@ -50,10 +57,10 @@ public class MyClient {
 		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
 		mrt.start();// スレッドを動かす（Runが動く）
 
-		MesgSendThread mst = new MesgSendThread(this);
-		mst.start();
+		mst = new MesgSendThread(this);
 
-		drow.requestFocus();
+		drow.title.hideErrorMsg();
+		drow.hideTilePane();
 	}
 
 	// メッセージ受信のためのスレッド
@@ -80,7 +87,7 @@ public class MyClient {
 				Join(myNumberInt);
 
 				drow.Login();
-
+				score = 0;
 				SendMessage("Join " + myNumberInt);
 
 				while (true) {
@@ -95,9 +102,6 @@ public class MyClient {
 							Update(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]),
 									Integer.parseInt(inputTokens[5]));
-							break;
-						case "Create":
-							Create();
 							break;
 						case "Delete":
 							Delete(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
@@ -123,7 +127,14 @@ public class MyClient {
 					}
 
 					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
-						drow.toGameOver();
+						drow.setGameOver();
+						loginFlag = false;
+						SendMessage("Disconnect " + myNumberInt);
+						SendMessage("BYE");
+						Disconnect(myNumberInt);
+						resetField();
+						accessFlag = false;
+
 						break;
 					}
 				}
@@ -178,8 +189,7 @@ public class MyClient {
 	}
 
 	public void LoadPlankton() {
-		Collection<CanEatObj> tmp = planktons.planariaData.values();
-		for (CanEatObj p : tmp) {
+		for (CanEatObj p : planktons.planariaData.values()) {
 			SendPlanktonData(p);
 		}
 	}
@@ -192,6 +202,7 @@ public class MyClient {
 		buf.append(p.current.x);
 		buf.append(" ");
 		buf.append(p.current.y);
+//		mst.msgQueue.add(buf.toString());
 		SendMessage(buf.toString());
 	}
 
@@ -201,11 +212,6 @@ public class MyClient {
 		} else {
 			return Join(userID);
 		}
-	}
-
-	// userID planariaID posX posY size
-	public void Create() {
-
 	}
 
 	// userID planariaID
@@ -218,17 +224,38 @@ public class MyClient {
 	public PlayerData Join(int ID) {
 		PlayerData p = new PlayerData(ID);
 		playerData.put(ID, p);
-		LoadPlankton();
+
+		Object[] pArray = playerData.keySet().toArray();
+		Arrays.sort(pArray);
+
+		for (int i : playerData.keySet()) {
+			if (i == 0) {
+				continue;
+			}
+			if (i == myNumberInt && ID != myNumberInt) {
+				LoadPlankton();
+			}
+			break;
+		}
+
 		return p;
 	}
 
 	public void Disconnect(int userID) {
-		Collection<CanEatObj> tmp = GetPlayer(userID).planariaData.values();
-		for (CanEatObj p : tmp) {
+		for (CanEatObj p : GetPlayer(userID).planariaData.values()) {
 			drow.Delete(p);
 			p = null;
 		}
 		playerData.remove(userID);
+	}
+
+	private void resetField() {
+		for (PlayerData p : playerData.values()) {
+			Disconnect(p.playerID);
+		}
+
+		drow.panel.removeAll();
+		drow.repaint();
 	}
 
 	public void SendMessage(String msg) {
@@ -255,24 +282,16 @@ public class MyClient {
 		SendMessage(buf.toString());
 	}
 
-	PlayerData[] tmpPlayer;
-	CanEatObj[] tmpObj;
-
 	public void Search(Planaria p) {
 
-		tmpPlayer = new PlayerData[playerData.size()];
-		playerData.values().toArray(tmpPlayer);
-
-		for (PlayerData player : tmpPlayer) {
-			tmpObj = new CanEatObj[player.planariaData.size()];
-			player.planariaData.values().toArray(tmpObj);
-			for (CanEatObj planaria : tmpObj) {
+		for (PlayerData player : playerData.values()) {
+			for (CanEatObj planaria : player.planariaData.values()) {
 				if (planaria == p) {
 					continue;
 				}
 
 				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 9
-						&& planaria.size < p.size) {
+						&& planaria.size < p.size * 0.9) {
 					Eat(p, player.playerID, planaria.localId, planaria.size);
 				}
 			}
@@ -280,15 +299,18 @@ public class MyClient {
 	}
 
 	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
+
+		if (userID != myNumberInt) {
+			score += size;
+		}
+
 		myPlanaria.setData(-1, -1, myPlanaria.size + size);
-		SendMessage("Delete " + userID + " " + planariaID);
 		Delete(userID, planariaID);
+		SendMessage("Delete " + userID + " " + planariaID);
 	}
 
 	public Point searchSpawnPoint() {
 		Random r = new Random();
-		tmpPlayer = new PlayerData[playerData.size()];
-		playerData.values().toArray(tmpPlayer);
 
 		int x, y;
 
@@ -296,7 +318,7 @@ public class MyClient {
 			x = r.nextInt(fieldSize);
 			y = r.nextInt(fieldSize);
 
-			if (canSpawn(tmpPlayer, x, y)) {
+			if (canSpawn(x, y)) {
 				break;
 			}
 		}
@@ -304,20 +326,18 @@ public class MyClient {
 		return new Point(x, y);
 	}
 
-	private boolean canSpawn(PlayerData[] tmpPlayer, int x, int y) {
+	private boolean canSpawn(int x, int y) {
 
-		for (PlayerData player : tmpPlayer) {
-			if(player.playerID == 0) {
+		for (PlayerData player : playerData.values()) {
+			if (player.playerID == 0) {
 				continue;
 			}
-			tmpObj = new CanEatObj[player.planariaData.size()];
-			player.planariaData.values().toArray(tmpObj);
-			for (CanEatObj planaria : tmpObj) {
+
+			for (CanEatObj planaria : player.planariaData.values()) {
 
 				if (Math.hypot(planaria.current.x - x, planaria.current.y - y) <= planaria.size / 9) {
 					return false;
 				}
-
 			}
 		}
 

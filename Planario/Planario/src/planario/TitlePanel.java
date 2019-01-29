@@ -1,5 +1,6 @@
 package planario;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -7,7 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 import javax.swing.text.Document;
@@ -18,11 +18,13 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	BufferedImage buffimg;
-	Graphics bfg;
+//	private BufferedImage buffimg;
+//	private Graphics bfg;
 
-	IpText ipStr;
-	MyClient mc;
+	public IpText ipStr;
+	private MyClient mc;
+
+	private JLabel errorText;
 
 	public TitlePanel(MyClient mc, int width, int height) {
 		this.mc = mc;
@@ -33,17 +35,17 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		int anqX = 250;
 		int anqY = 50;
 
-		JLabel menu = new JLabel(new ImageIcon(LoadManager.loadImage("res/TitleMenu.png")));
+		JLabel menu = new JLabel(LoadManager.getIcon("res/TitleMenu.png"));
 		menu.setOpaque(false);
 		menu.setBounds(anqX, anqY, 500, 500);
 		add(menu);
 
-		JButton playButton = new JButton(new ImageIcon(LoadManager.loadImage("res/play.png")));
+		JButton playButton = new JButton(LoadManager.getIcon("res/play.png"));
 		playButton.addActionListener(this);
 		playButton.setContentAreaFilled(false);
 		playButton.setBorderPainted(false);
 		playButton.setOpaque(false);
-		playButton.setPressedIcon(new ImageIcon(LoadManager.loadImage("res/pressPlay.png")));
+		playButton.setPressedIcon(LoadManager.getIcon("res/pressPlay.png"));
 
 		playButton.setBounds(anqX + 100, anqY + 300, 300, 140);
 		add(playButton);
@@ -57,6 +59,13 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		ipStr.setPlaceholder("localhost");
 		ipStr.setFont(new Font("ＭＳ ゴシック", Font.PLAIN, 30));
 		ipStr.addActionListener(this);
+
+		errorText = new JLabel("エラーメッセージ");
+		errorText.setBounds(anqX + 100, anqY + 200, 300, 50);
+		errorText.setOpaque(false);
+		errorText.setFont(new Font("ＭＳ ゴシック", Font.BOLD, 20));
+		errorText.setForeground(new Color(255, 0, 0));
+		errorText.setHorizontalAlignment(JLabel.CENTER);
 
 //		try {
 //			buffimg = ImageIO.read(new File("GameOver.png"));
@@ -73,8 +82,23 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		mc.Access(ipStr.getText());
-		SwingUtilities.getAncestorOfClass(JLayeredPane.class, this).remove(this);
+		if (!MyClient.accessFlag) {
+			mc.Access(ipStr.getText());
+		}
+	}
+
+	public void setErrorMsg(String msg) {
+		errorText.setText(msg);
+		add(errorText);
+		setLayer(errorText, JLayeredPane.PALETTE_LAYER);
+	}
+
+	public void hideErrorMsg() {
+		try {
+			remove(errorText);
+		} catch (Exception e) {
+
+		}
 	}
 
 	public class IpText extends JTextField {

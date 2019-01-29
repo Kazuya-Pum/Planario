@@ -1,15 +1,18 @@
 package planario;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerData {
 	final int playerID;
 	int skin = 1;
 
-	public Map<Integer,CanEatObj> planariaData = new HashMap<Integer,CanEatObj>();
+	public ConcurrentHashMap<Integer,CanEatObj> planariaData = new ConcurrentHashMap<Integer,CanEatObj>();
 
 	public PlayerData(int ID) {
 		playerID = ID;
+	}
+
+	public int getSize() {
+		return planariaData.size();
 	}
 }

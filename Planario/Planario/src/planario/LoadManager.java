@@ -7,8 +7,8 @@ import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 public class LoadManager extends Component {
 
@@ -32,6 +32,10 @@ public class LoadManager extends Component {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static ImageIcon getIcon(String path) {
+		return new ImageIcon(getUrlPath(path));
 	}
 
 	public static Image loadImage(String path) {
