@@ -1,6 +1,7 @@
 package planario;
 
-import javax.swing.ImageIcon;
+import java.awt.image.BufferedImage;
+
 
 public class Planaria extends CanEatObj {
 
@@ -13,8 +14,8 @@ public class Planaria extends CanEatObj {
 	int skin;
 	double speed;
 
-	public Planaria(ImageIcon icon, int skin, int posX, int posY, int size, int id) {
-		super(icon, posX, posY, size);
+	public Planaria(BufferedImage buffimg, int skin, int posX, int posY, int size, int id) {
+		super(buffimg, posX, posY, size);
 		this.skin = skin;
 
 		speed = chSpeed(this.size);

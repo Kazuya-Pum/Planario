@@ -38,7 +38,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		JLabel menu = new JLabel(LoadManager.getIcon("res/TitleMenu.png"));
 		menu.setOpaque(false);
 		menu.setBounds(anqX, anqY, 500, 500);
-		add(menu);
+
 
 		JButton playButton = new JButton(LoadManager.getIcon("res/play.png"));
 		playButton.addActionListener(this);
@@ -46,7 +46,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		playButton.setBorderPainted(false);
 		playButton.setOpaque(false);
 		playButton.setPressedIcon(LoadManager.getIcon("res/pressPlay.png"));
-
 		playButton.setBounds(anqX + 100, anqY + 300, 300, 140);
 		add(playButton);
 		setLayer(playButton, JLayeredPane.PALETTE_LAYER);
@@ -67,6 +66,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText.setForeground(new Color(255, 0, 0));
 		errorText.setHorizontalAlignment(JLabel.CENTER);
 
+		add(menu);
 //		try {
 //			buffimg = ImageIO.read(new File("GameOver.png"));
 //		} catch (IOException e) {

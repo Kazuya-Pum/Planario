@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageProducer;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import javax.imageio.ImageIO;
@@ -21,13 +20,13 @@ public class LoadManager extends Component {
 	private LoadManager() {
 	}
 
-	public static String getUrlPath(String path) {
-		return lm.getClass().getClassLoader().getResource(path).getPath();
+	public static URL getUrl(String path) {
+		return lm.getClass().getClassLoader().getResource(path);
 	}
 
 	public static BufferedImage getBuffImg(String path) {
 		try {
-			return ImageIO.read(new File(getUrlPath(path)));
+			return ImageIO.read(getUrl(path));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -35,11 +34,11 @@ public class LoadManager extends Component {
 	}
 
 	public static ImageIcon getIcon(String path) {
-		return new ImageIcon(getUrlPath(path));
+		return new ImageIcon(getUrl(path));
 	}
 
 	public static Image loadImage(String path) {
-		URL url = lm.getClass().getClassLoader().getResource(path);
+		URL url = getUrl(path);
 		try {
 			return lm.createImage((ImageProducer) url.getContent());
 		} catch (Exception ex) {

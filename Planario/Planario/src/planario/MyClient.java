@@ -135,6 +135,9 @@ public class MyClient {
 						resetField();
 						accessFlag = false;
 
+						AUDIO.BGM.stop();
+						AUDIO.END.play();
+
 						break;
 					}
 				}
@@ -307,6 +310,12 @@ public class MyClient {
 		myPlanaria.setData(-1, -1, myPlanaria.size + size);
 		Delete(userID, planariaID);
 		SendMessage("Delete " + userID + " " + planariaID);
+
+		if(userID == 0) {
+			AUDIO.EAT_1.play();
+		} else {
+			AUDIO.EAT_2.play();
+		}
 	}
 
 	public Point searchSpawnPoint() {
@@ -346,5 +355,8 @@ public class MyClient {
 
 	public static void main(String[] args) {
 		new MyClient();
+		AUDIO.init();
+
+		AUDIO.BGM.loop();
 	}
 }

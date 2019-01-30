@@ -1,11 +1,12 @@
 package planario;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import javax.swing.JPanel;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-
-public abstract class CanEatObj extends JLabel {
+public abstract class CanEatObj extends JPanel {
 
 	/**
 	 *
@@ -18,8 +19,13 @@ public abstract class CanEatObj extends JLabel {
 	public int posY;
 	public Point current = new Point();
 
-	public CanEatObj(ImageIcon icon, int x, int y, int size) {
-		super(icon);
+	BufferedImage buffimg;
+	Graphics2D bfg;
+
+	public CanEatObj(BufferedImage buffimg, int x, int y, int size) {
+		this.buffimg = buffimg;
+		setBounds(x, y, size, size);
+		setOpaque(false);
 
 		if (x >= 0) {
 			posX = x;
@@ -47,6 +53,11 @@ public abstract class CanEatObj extends JLabel {
 
 	public int getVisualSize() {
 		return size / 3;
+	}
+
+	@Override
+	public void paintComponent(Graphics myg) {
+		myg.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
 	}
 
 }
