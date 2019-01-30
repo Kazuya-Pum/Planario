@@ -33,9 +33,9 @@ public enum AUDIO {
 
 	public void play() {
 		if (clip.isRunning()) {
-			clip.stop(); // Stop the player if it is still runnings
+			clip.stop();
 		}
-		clip.setFramePosition(0); // rewind to the beginning
+		clip.setFramePosition(0);
 		clip.start();
 	}
 
@@ -54,6 +54,6 @@ public enum AUDIO {
 	}
 
 	static void init() {
-		values(); // calls the constructor for all the elements
+		values();
 	}
 }

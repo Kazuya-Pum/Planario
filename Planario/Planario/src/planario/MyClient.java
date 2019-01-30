@@ -302,7 +302,6 @@ public class MyClient {
 	}
 
 	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
-
 		if (userID != myNumberInt) {
 			score += size;
 		}

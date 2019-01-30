@@ -37,7 +37,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	boolean init = false;
 
 	Random random = new Random();
-
 	private Point mouse = new Point();
 
 	public class DrowThread extends Thread {
@@ -84,11 +83,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		centerPoint.x = 0;
 		centerPoint.y = 0;
 
-		int count = mc.GetPlayer(mc.myNumberInt).getSize();
-
-		if (count == 0) {
-			return;
-		}
+		int count = 0;
 
 		for (CanEatObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
@@ -101,6 +96,11 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			centerPoint.y += p.current.y;
 
 			mc.Search(p);
+			count++;
+		}
+
+		if (count == 0) {
+			return;
 		}
 
 		try {
@@ -293,6 +293,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	private void Spilit() {
 
+		int count = mc.GetPlayer(mc.myNumberInt).getSize();
 		for (CanEatObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
 			Planaria planaria = (Planaria) c;
@@ -304,6 +305,10 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			Planaria child = Create(planaria.skin, planaria.current.x, planaria.current.y, planaria.size);
 			child.setData(planaria.current.x + (int) (Vector2[0] * 300), planaria.current.y + (int) (Vector2[1] * 300),
 					-1);
+
+			if (--count <= 0) {
+				break;
+			}
 		}
 	}
 
