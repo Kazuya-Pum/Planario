@@ -258,8 +258,7 @@ public class MyClient {
 			Disconnect(p.playerID);
 		}
 
-		drow.panel.removeAll();
-		drow.repaint();
+		drow.fieldReset();
 	}
 
 	public void SendMessage(String msg) {

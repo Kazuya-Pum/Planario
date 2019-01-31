@@ -3,7 +3,6 @@ package planario;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -17,7 +16,6 @@ public class GameOverPanel extends JLayeredPane implements KeyListener, MouseLis
 	 */
 	private static final long serialVersionUID = 1L;
 	BufferedImage buffimg;
-	Graphics2D bfg;
 	JLabel scoreText;
 	Drow drow;
 
@@ -26,7 +24,6 @@ public class GameOverPanel extends JLayeredPane implements KeyListener, MouseLis
 
 		setPreferredSize(new Dimension(width, height));
 		buffimg = LoadManager.getBuffImg("res/GameOver.png");
-		bfg = buffimg.createGraphics();
 
 		setOpaque(false);
 		addKeyListener(this);

@@ -13,14 +13,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	 */
 	private static final long serialVersionUID = 1L;
 	private JLayeredPane contentPane;
-	public JPanel panel;
-	private BackGroundPane backGround;
-	private JLayeredPane borderPane;
 	public TitlePanel title;
 	private GameOverPanel gameOver;
+	private FieldPane field;
 
 	private static final int MAX_PLANKTON = 100;
-	private static final int VIRUS = 100;
+//	private static final int VIRUS = 100;
 
 	MediaTracker tracker;
 	public BufferedImage[] skins = new BufferedImage[1];
@@ -110,8 +108,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			centerPoint.y -= dr.height / 2;
 			centerPoint.x *= -1;
 			centerPoint.y *= -1;
-			panel.setLocation(centerPoint);
-			backGround.setLocation(centerPoint);
+			field.setLocation(centerPoint);
 
 			prevCenter.x = centerPoint.x;
 			prevCenter.y = centerPoint.y;
@@ -173,27 +170,11 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 		setTitlePane();
 
-		borderPane = new JLayeredPane();
-		borderPane.setLayout(new BorderLayout(0, 0));
-		borderPane.setSize(dr.width, dr.height);
-		contentPane.add(borderPane);
-		contentPane.setLayer(borderPane, JLayeredPane.DEFAULT_LAYER);
+		field = new FieldPane(mc.fieldSize);
+		contentPane.add(field);
+		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
 
-		JLayeredPane field = new JLayeredPane();
-		field.setLayout(null);
-		borderPane.add(field);
-		borderPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
-
-		panel = new JPanel();
-		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
-		panel.setOpaque(false);
-		field.add(panel);
-		field.setLayer(panel, JLayeredPane.PALETTE_LAYER);
-		panel.setLayout(null);
-
-		backGround = new BackGroundPane(mc.fieldSize);
-		field.add(backGround);
-		field.setLayer(backGround, JLayeredPane.DEFAULT_LAYER);
+		gameOver = new GameOverPanel(dr.width, dr.height, this);
 
 		repaint();
 
@@ -265,7 +246,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		planaria.setBounds(x, y, size, size);
 
 		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
-		panel.add(planaria);
+		field.add(planaria);
+		field.setLayer(planaria, JLayeredPane.PALETTE_LAYER);
 
 		return planaria;
 	}
@@ -278,7 +260,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		Plankton plankton = new Plankton(planktonSkin, x, y, mc.planktonSize, id);
 		plankton.setBounds(x, y, mc.planktonSize, mc.planktonSize);
 
-		panel.add(plankton);
+		field.add(plankton);
 
 		return plankton;
 	}
@@ -287,7 +269,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		if (p == null) {
 			return;
 		}
-		panel.remove(p);
+		field.remove(p);
+	}
+
+	public void fieldReset() {
+		field.removeAll();
+		repaint();
 	}
 
 	private void Spilit() {
@@ -318,9 +305,9 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 		int size = planaria.size / count;
 
-		planaria.setData(-1,-1,size);
+		planaria.setData(-1, -1, size);
 
-		for(int i = 1; i < count; i++) {
+		for (int i = 1; i < count; i++) {
 
 		}
 
@@ -352,8 +339,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 		gameOver.setScoreText(mc.score);
 		gameOver.setSize(dr.width, dr.height);
-		borderPane.add(gameOver, BorderLayout.CENTER);
-		borderPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
+		contentPane.add(gameOver);
+		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
 		gameOver.requestFocus();
 
 		repaint();
@@ -364,7 +351,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		setTitlePane();
 		AUDIO.BGM.restart();
 		try {
-			borderPane.remove(gameOver);
+			contentPane.remove(gameOver);
 		} catch (Exception e) {
 
 		}
@@ -397,11 +384,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		if (!init) {
 			initialize();
 		} else {
-			borderPane.setSize(dr.width, dr.height);
+			gameOver.setSize(dr.width, dr.height);
 		}
-
-		borderPane.repaint();
-
 	}
 
 	@Override
