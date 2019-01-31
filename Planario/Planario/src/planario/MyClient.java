@@ -14,7 +14,8 @@ public class MyClient {
 	int myNumberInt;
 	Drow drow;
 	int planktonSize = 10;
-	int defualtSize = 100;
+	int planktonScore = 1;
+	int defualtSize = 30;
 	PlayerData planktons;
 	int fieldSize = 4000;
 	int score = 0;
@@ -293,7 +294,7 @@ public class MyClient {
 					continue;
 				}
 
-				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 9
+				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3
 						&& planaria.size < p.size * 0.9) {
 					Eat(p, player.playerID, planaria.localId, planaria.size);
 				}
@@ -303,6 +304,9 @@ public class MyClient {
 
 	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
 		if (userID != myNumberInt) {
+			if(userID == 0) {
+				size = planktonScore;
+			}
 			score += size;
 		}
 
@@ -343,7 +347,7 @@ public class MyClient {
 
 			for (CanEatObj planaria : player.planariaData.values()) {
 
-				if (Math.hypot(planaria.current.x - x, planaria.current.y - y) <= planaria.size / 9) {
+				if (Math.hypot(planaria.current.x - x, planaria.current.y - y) <= planaria.size / 3) {
 					return false;
 				}
 			}

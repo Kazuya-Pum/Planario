@@ -33,8 +33,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	Dimension dr;
 
-	int sizeRate = 3;
-
 	boolean init = false;
 
 	Random random = new Random();
@@ -241,7 +239,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	private void Update(Planaria planaria) {
 		currentSize = planaria.getSize().width;
-		size = planaria.size / sizeRate;
+		size = planaria.size;
 		iconSize = size;
 		if (currentSize != size) {
 			iconSize = Lerp(currentSize, size, 0.6f);
@@ -264,7 +262,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
 		Planaria planaria = new Planaria(skins[skin], skin, x, y, size, planariaID);
-		planaria.setBounds(x, y, size / sizeRate, size / sizeRate);
+		planaria.setBounds(x, y, size, size);
 
 		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
 		panel.add(planaria);
@@ -298,7 +296,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		for (CanEatObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
 			Planaria planaria = (Planaria) c;
-			if (planaria.size / 3 < 30) {
+			if (planaria.size < mc.defualtSize * 2) {
 				continue;
 			}
 
@@ -311,6 +309,21 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 				break;
 			}
 		}
+	}
+
+	public void VirusSpilit(Planaria planaria) {
+		int count = planaria.size / mc.defualtSize;
+
+		count = (count > 5) ? 5 : count;
+
+		int size = planaria.size / count;
+
+		planaria.setData(-1,-1,size);
+
+		for(int i = 1; i < count; i++) {
+
+		}
+
 	}
 
 	private void normalize(int x, int y) {
