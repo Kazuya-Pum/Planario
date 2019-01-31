@@ -20,6 +20,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private GameOverPanel gameOver;
 
 	private static final int MAX_PLANKTON = 100;
+	private static final int VIRUS = 100;
 
 	MediaTracker tracker;
 	public BufferedImage[] skins = new BufferedImage[1];

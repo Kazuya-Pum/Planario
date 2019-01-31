@@ -50,7 +50,7 @@ public enum AUDIO {
 	public void restart() {
 		clip.flush();
 		clip.setFramePosition(0);
-		clip.start();
+		clip.loop(Clip.LOOP_CONTINUOUSLY);
 	}
 
 	static void init() {

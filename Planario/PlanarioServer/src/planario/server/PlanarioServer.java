@@ -94,7 +94,7 @@ class PlanarioServer {
 		member = 0;// 誰も接続していないのでメンバー数は０
 
 		try {
-			System.out.println("The server2 has launched!");
+			System.out.println("The Planar.io Server has launched!");
 			ServerSocket server = new ServerSocket(10000);// 10000番ポートを利用する
 			while (true) {
 				incoming[n] = server.accept();
