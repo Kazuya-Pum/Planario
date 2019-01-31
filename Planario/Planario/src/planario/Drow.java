@@ -82,12 +82,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 		int count = 0;
 
-		for (CanEatObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
+		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
 			Planaria p = (Planaria) c;
 			normalize(mouse.x - prevCenter.x - p.current.x, mouse.y - prevCenter.y - p.current.y);
 
-			p.setData(p.posX + (int) (Vector2[0] * p.speed), p.posY + (int) (Vector2[1] * p.speed), -1);
+			p.setData(p.nextX + (int) (Vector2[0] * p.getSpeed()), p.nextY + (int) (Vector2[1] * p.getSpeed()), -1);
 			posUpdate(p);
 			centerPoint.x += p.current.x;
 			centerPoint.y += p.current.y;
@@ -125,7 +125,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 				continue;
 			}
 
-			for (CanEatObj p : player.planariaData.values()) {
+			for (EatableObj p : player.planariaData.values()) {
 				Update((Planaria) p);
 			}
 		}
@@ -216,25 +216,23 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	private int currentSize;
 	private int size;
-	private int iconSize;
 
 	private void Update(Planaria planaria) {
 		currentSize = planaria.getSize().width;
 		size = planaria.size;
-		iconSize = size;
 		if (currentSize != size) {
-			iconSize = Lerp(currentSize, size, 0.6f);
+			size = Lerp(currentSize, size, 0.6f);
 		}
 
-		planaria.setBounds(planaria.current.x, planaria.current.y, iconSize, iconSize);
+		planaria.setBounds(planaria.current.x, planaria.current.y, size, size);
 	}
 
 	private void posUpdate(Planaria planaria) {
-		planaria.posX = (planaria.posX > mc.fieldSize) ? mc.fieldSize : planaria.posX;
-		planaria.posY = (planaria.posY > mc.fieldSize) ? mc.fieldSize : planaria.posY;
+		planaria.nextX = (planaria.nextX > mc.fieldSize) ? mc.fieldSize : planaria.nextX;
+		planaria.nextY = (planaria.nextY > mc.fieldSize) ? mc.fieldSize : planaria.nextY;
 
-		planaria.current.x = Lerp(planaria.current.x, planaria.posX, 0.25f);
-		planaria.current.y = Lerp(planaria.current.y, planaria.posY, 0.25f);
+		planaria.current.x = Lerp(planaria.current.x, planaria.nextX, 0.25f);
+		planaria.current.y = Lerp(planaria.current.y, planaria.nextY, 0.25f);
 	}
 
 	public Planaria Create(int skin, int x, int y, int size) {
@@ -243,7 +241,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
 		Planaria planaria = new Planaria(skins[skin], skin, x, y, size, planariaID);
-		planaria.setBounds(x, y, size, size);
 
 		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
 		field.add(planaria);
@@ -258,14 +255,13 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	public Plankton PopPlankton(int x, int y, int id) {
 		Plankton plankton = new Plankton(planktonSkin, x, y, mc.planktonSize, id);
-		plankton.setBounds(x, y, mc.planktonSize, mc.planktonSize);
 
 		field.add(plankton);
 
 		return plankton;
 	}
 
-	public void Delete(CanEatObj p) {
+	public void Delete(EatableObj p) {
 		if (p == null) {
 			return;
 		}
@@ -280,7 +276,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private void Spilit() {
 
 		int count = mc.GetPlayer(mc.myNumberInt).getSize();
-		for (CanEatObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
+		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
 			Planaria planaria = (Planaria) c;
 			if (planaria.size < mc.defualtSize * 2) {
@@ -344,7 +340,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		gameOver.requestFocus();
 
 		repaint();
-		System.out.println("GameOver");
 	}
 
 	public void hideGameOver() {

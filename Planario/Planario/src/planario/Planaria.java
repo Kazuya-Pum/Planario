@@ -2,8 +2,7 @@ package planario;
 
 import java.awt.image.BufferedImage;
 
-
-public class Planaria extends CanEatObj {
+public class Planaria extends EatableObj {
 
 	/**
 	 *
@@ -12,13 +11,16 @@ public class Planaria extends CanEatObj {
 
 	private static int id;
 	int skin;
-	double speed;
+	private double speed;
 
-	public Planaria(BufferedImage buffimg, int skin, int posX, int posY, int size, int id) {
-		super(buffimg, posX, posY, size);
+	public int nextX;
+	public int nextY;
+
+	public Planaria(BufferedImage buffimg, int skin, int x, int y, int size, int id) {
+		super(buffimg, x, y, size);
 		this.skin = skin;
 
-		speed = chSpeed(this.size);
+		setData(x, y, size);
 
 		if (id != -1) {
 			this.localId = id;
@@ -30,10 +32,10 @@ public class Planaria extends CanEatObj {
 	public void setData(int x, int y, int size) {
 
 		if (x >= 0) {
-			posX = x;
+			nextX = x;
 		}
 		if (y >= 0) {
-			posY = y;
+			nextY = y;
 		}
 		if (size > 0) {
 			this.size = size;
@@ -55,7 +57,11 @@ public class Planaria extends CanEatObj {
 	}
 
 	private double chSpeed(int size) {
-		double tmp = 10 - (0.005 * size);
+		double tmp = 10 - (0.01 * size);
 		return (tmp < 1) ? 1 : tmp;
+	}
+
+	public double getSpeed() {
+		return this.speed;
 	}
 }

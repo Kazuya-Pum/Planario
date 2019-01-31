@@ -2,7 +2,7 @@ package planario;
 
 import java.awt.image.BufferedImage;
 
-public class Plankton extends CanEatObj {
+public class Plankton extends EatableObj {
 
 	/**
 	 *

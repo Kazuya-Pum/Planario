@@ -41,8 +41,8 @@ public class GameOverPanel extends JLayeredPane implements KeyListener, MouseLis
 	}
 
 	@Override
-	public void paintComponent(Graphics myg) {
-		myg.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
+	public void paintComponent(Graphics g) {
+		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
 	}
 
 	@Override

@@ -31,7 +31,14 @@ public class MyClient {
 	}
 
 	public void Access(String serverIP) {
-		accessFlag = true;
+
+		// 重複してメソッドを実行させないようにフラグで管理
+		if (accessFlag) {
+			return;
+		} else {
+			accessFlag = true;
+		}
+
 		String myName = "";
 
 		if (serverIP.equals("")) {
@@ -127,14 +134,13 @@ public class MyClient {
 						break;
 					}
 
+					// 自身のプラナリアの数が0になればゲームオーバー判定
 					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
 						drow.setGameOver();
-						loginFlag = false;
-						SendMessage("Disconnect " + myNumberInt);
 						SendMessage("BYE");
-						Disconnect(myNumberInt);
 						resetField();
-						accessFlag = false;
+						loginFlag = false;
+						accessFlag = false; // アクセスメソッドを使用可能に
 
 						AUDIO.BGM.stop();
 						AUDIO.END.play();
@@ -193,12 +199,12 @@ public class MyClient {
 	}
 
 	public void LoadPlankton() {
-		for (CanEatObj p : planktons.planariaData.values()) {
+		for (EatableObj p : planktons.planariaData.values()) {
 			SendPlanktonData(p);
 		}
 	}
 
-	private void SendPlanktonData(CanEatObj p) {
+	private void SendPlanktonData(EatableObj p) {
 		StringBuilder buf = new StringBuilder();
 		buf.append("Pop ");
 		buf.append(p.localId);
@@ -206,7 +212,6 @@ public class MyClient {
 		buf.append(p.current.x);
 		buf.append(" ");
 		buf.append(p.current.y);
-//		mst.msgQueue.add(buf.toString());
 		SendMessage(buf.toString());
 	}
 
@@ -246,7 +251,7 @@ public class MyClient {
 	}
 
 	public void Disconnect(int userID) {
-		for (CanEatObj p : GetPlayer(userID).planariaData.values()) {
+		for (EatableObj p : GetPlayer(userID).planariaData.values()) {
 			drow.Delete(p);
 			p = null;
 		}
@@ -254,10 +259,8 @@ public class MyClient {
 	}
 
 	private void resetField() {
-		for (PlayerData p : playerData.values()) {
-			Disconnect(p.playerID);
-		}
 
+		playerData.clear();
 		drow.fieldReset();
 	}
 
@@ -288,7 +291,7 @@ public class MyClient {
 	public void Search(Planaria p) {
 
 		for (PlayerData player : playerData.values()) {
-			for (CanEatObj planaria : player.planariaData.values()) {
+			for (EatableObj planaria : player.planariaData.values()) {
 				if (planaria == p) {
 					continue;
 				}
@@ -303,7 +306,7 @@ public class MyClient {
 
 	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
 		if (userID != myNumberInt) {
-			if(userID == 0) {
+			if (userID == 0) {
 				size = planktonScore;
 			}
 			score += size;
@@ -313,7 +316,7 @@ public class MyClient {
 		Delete(userID, planariaID);
 		SendMessage("Delete " + userID + " " + planariaID);
 
-		if(userID == 0) {
+		if (userID == 0) {
 			AUDIO.EAT_1.play();
 		} else {
 			AUDIO.EAT_2.play();
@@ -344,7 +347,7 @@ public class MyClient {
 				continue;
 			}
 
-			for (CanEatObj planaria : player.planariaData.values()) {
+			for (EatableObj planaria : player.planariaData.values()) {
 
 				if (Math.hypot(planaria.current.x - x, planaria.current.y - y) <= planaria.size / 3) {
 					return false;

@@ -8,9 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.*;
-import javax.swing.text.Document;
 
 public class TitlePanel extends JLayeredPane implements ActionListener {
 
@@ -18,8 +16,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-//	private BufferedImage buffimg;
-//	private Graphics bfg;
 
 	public IpText ipStr;
 	private MyClient mc;
@@ -38,7 +34,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		JLabel menu = new JLabel(LoadManager.getIcon("res/TitleMenu.png"));
 		menu.setOpaque(false);
 		menu.setBounds(anqX, anqY, 500, 500);
-
 
 		JButton playButton = new JButton(LoadManager.getIcon("res/play.png"));
 		playButton.addActionListener(this);
@@ -67,24 +62,13 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText.setHorizontalAlignment(JLabel.CENTER);
 
 		add(menu);
-//		try {
-//			buffimg = ImageIO.read(new File("GameOver.png"));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		bfg = buffimg.createGraphics();
 	}
-
-//	@Override
-//	public void paintComponent(Graphics myg) {
-//		myg.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
-//	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (!MyClient.accessFlag) {
-			mc.Access(ipStr.getText());
-		}
+		String ip = ipStr.getText().trim();
+		ipStr.setText(ip);
+		mc.Access(ip);
 	}
 
 	public void setErrorMsg(String msg) {
@@ -113,41 +97,21 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		public IpText() {
 		}
 
-		public IpText(final Document pDoc, final String pText, final int pColumns) {
-			super(pDoc, pText, pColumns);
-		}
-
-		public IpText(final int pColumns) {
-			super(pColumns);
-		}
-
-		public IpText(final String pText) {
-			super(pText);
-		}
-
-		public IpText(final String pText, final int pColumns) {
-			super(pText, pColumns);
-		}
-
-		public String getPlaceholder() {
-			return placeholder;
-		}
-
 		@Override
-		protected void paintComponent(final Graphics pG) {
-			super.paintComponent(pG);
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
 
 			if (placeholder == null || placeholder.length() == 0 || getText().length() > 0) {
 				return;
 			}
 
-			final Graphics2D g = (Graphics2D) pG;
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setColor(getDisabledTextColor());
-			g.drawString(placeholder, getInsets().left, pG.getFontMetrics().getMaxAscent() + getInsets().top);
+			final Graphics2D g2 = (Graphics2D) g;
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setColor(getDisabledTextColor());
+			g2.drawString(placeholder, getInsets().left, g2.getFontMetrics().getMaxAscent() + getInsets().top);
 		}
 
-		public void setPlaceholder(final String s) {
+		public void setPlaceholder(String s) {
 			placeholder = s;
 		}
 
