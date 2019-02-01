@@ -1,11 +1,9 @@
 package planario;
 
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import javax.swing.JPanel;
 
-public abstract class EatableObj extends JPanel {
+public abstract class EatableObj extends Resizable {
 
 	/**
 	 *
@@ -16,10 +14,9 @@ public abstract class EatableObj extends JPanel {
 	public int localId;
 	public Point current = new Point();
 
-	BufferedImage buffimg;
-
 	public EatableObj(BufferedImage buffimg, int x, int y, int size) {
-		this.buffimg = buffimg;
+		super(buffimg);
+
 		setBounds(x, y, size, size);
 		setOpaque(false);
 
@@ -46,10 +43,4 @@ public abstract class EatableObj extends JPanel {
 	public int getVisualSize() {
 		return size / 3;
 	}
-
-	@Override
-	public void paintComponent(Graphics myg) {
-		myg.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
-	}
-
 }

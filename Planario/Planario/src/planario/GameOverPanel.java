@@ -2,29 +2,26 @@ package planario;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 import javax.swing.*;
 
-public class GameOverPanel extends JLayeredPane implements KeyListener, MouseListener {
+public class GameOverPanel extends Resizable implements KeyListener, MouseListener {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	BufferedImage buffimg;
 	JLabel scoreText;
 	Drow drow;
 
 	public GameOverPanel(int width, int height, Drow drow) {
+		super("res/GameOver.png");
+
 		this.drow = drow;
 
 		setPreferredSize(new Dimension(width, height));
-		buffimg = LoadManager.getBuffImg("res/GameOver.png");
-
 		setOpaque(false);
 		addKeyListener(this);
 		addMouseListener(this);
@@ -38,11 +35,6 @@ public class GameOverPanel extends JLayeredPane implements KeyListener, MouseLis
 
 	public void setScoreText(int score) {
 		scoreText.setText("Score : " + score);
-	}
-
-	@Override
-	public void paintComponent(Graphics g) {
-		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
 	}
 
 	@Override

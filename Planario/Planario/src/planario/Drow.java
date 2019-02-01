@@ -186,7 +186,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			title = new TitlePanel(mc, dr.width, dr.height);
 		}
 
-		title.setSize(dr.width, dr.height);
+		title.setNewSize(dr);
 		contentPane.add(title);
 		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
 		title.ipStr.requestFocus();
@@ -334,7 +334,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		}
 
 		gameOver.setScoreText(mc.score);
-		gameOver.setSize(dr.width, dr.height);
 		contentPane.add(gameOver);
 		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
 		gameOver.requestFocus();
@@ -379,7 +378,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		if (!init) {
 			initialize();
 		} else {
-			gameOver.setSize(dr.width, dr.height);
+			gameOver.setSize(dr);
+			title.setNewSize(dr);
 		}
 	}
 

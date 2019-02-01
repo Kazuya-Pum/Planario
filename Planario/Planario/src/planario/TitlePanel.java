@@ -19,7 +19,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 	public IpText ipStr;
 	private MyClient mc;
-
+	private JLabel menu;
 	private JLabel errorText;
 
 	public TitlePanel(MyClient mc, int width, int height) {
@@ -31,9 +31,10 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		int anqX = 250;
 		int anqY = 50;
 
-		JLabel menu = new JLabel(LoadManager.getIcon("res/TitleMenu.png"));
+		menu = new JLabel(LoadManager.getIcon("res/TitleMenu.png"));
 		menu.setOpaque(false);
 		menu.setBounds(anqX, anqY, 500, 500);
+		add(menu);
 
 		JButton playButton = new JButton(LoadManager.getIcon("res/play.png"));
 		playButton.addActionListener(this);
@@ -41,13 +42,13 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		playButton.setBorderPainted(false);
 		playButton.setOpaque(false);
 		playButton.setPressedIcon(LoadManager.getIcon("res/pressPlay.png"));
-		playButton.setBounds(anqX + 100, anqY + 300, 300, 140);
-		add(playButton);
+		playButton.setBounds(100, 300, 300, 140);
+		menu.add(playButton);
 		setLayer(playButton, JLayeredPane.PALETTE_LAYER);
 
 		ipStr = new IpText();
-		ipStr.setBounds(anqX + 100, anqY + 250, 300, 50);
-		add(ipStr);
+		ipStr.setBounds(100, 250, 300, 50);
+		menu.add(ipStr);
 		ipStr.setOpaque(false);
 		setLayer(ipStr, JLayeredPane.PALETTE_LAYER);
 		ipStr.setPlaceholder("localhost");
@@ -55,13 +56,12 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		ipStr.addActionListener(this);
 
 		errorText = new JLabel("エラーメッセージ");
-		errorText.setBounds(anqX + 100, anqY + 200, 300, 50);
+		errorText.setBounds(100, 200, 300, 50);
 		errorText.setOpaque(false);
 		errorText.setFont(new Font("ＭＳ ゴシック", Font.BOLD, 20));
 		errorText.setForeground(new Color(255, 0, 0));
 		errorText.setHorizontalAlignment(JLabel.CENTER);
 
-		add(menu);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 	public void setErrorMsg(String msg) {
 		errorText.setText(msg);
-		add(errorText);
+		menu.add(errorText);
 		setLayer(errorText, JLayeredPane.PALETTE_LAYER);
 	}
 
@@ -83,6 +83,11 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		} catch (Exception e) {
 
 		}
+	}
+
+	public void setNewSize(Dimension dr) {
+		setSize(dr);
+		menu.setLocation(dr.width / 2 - menu.getSize().width / 2, dr.height / 2 - menu.getSize().height / 2);
 	}
 
 	public class IpText extends JTextField {
