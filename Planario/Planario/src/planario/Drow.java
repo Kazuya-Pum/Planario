@@ -360,6 +360,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		}
 
 		gameOver.setScoreText(mc.score);
+		gameOver.setSize(dr);
 		contentPane.add(gameOver);
 		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
 		gameOver.requestFocus();
