@@ -125,7 +125,7 @@ public class MyClient {
 							break;
 						case "Pop":
 							Pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
-									Integer.parseInt(inputTokens[3]));
+									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]));
 							break;
 						default:
 							break;
@@ -183,16 +183,29 @@ public class MyClient {
 		}
 	}
 
-	public void Pop(int planktonID, int posX, int posY) {
+	public void Pop(int planktonID, int posX, int posY, int virus) {
 		if (!planktons.planariaData.containsKey(planktonID)) {
-			planktons.planariaData.put(planktonID, drow.PopPlankton(posX, posY, planktonID));
+			Plankton plankton;
+
+			if (virus == 1) {
+				plankton = drow.PopVirus(posX, posY, planktonID);
+			} else {
+				plankton = drow.PopPlankton(posX, posY, planktonID);
+			}
+			planktons.planariaData.put(planktonID, plankton);
 		}
 	}
 
 	Random random = new Random();
 
-	public void Pop() {
-		Plankton plankton = drow.PopPlankton(random.nextInt(fieldSize), random.nextInt(fieldSize));
+	public void Pop(boolean virus) {
+		Plankton plankton;
+
+		if (virus) {
+			plankton = drow.PopVirus(random.nextInt(fieldSize), random.nextInt(fieldSize));
+		} else {
+			plankton = drow.PopPlankton(random.nextInt(fieldSize), random.nextInt(fieldSize));
+		}
 		planktons.planariaData.put(plankton.localId, plankton);
 
 		SendPlanktonData(plankton);
@@ -200,11 +213,11 @@ public class MyClient {
 
 	public void LoadPlankton() {
 		for (EatableObj p : planktons.planariaData.values()) {
-			SendPlanktonData(p);
+			SendPlanktonData((Plankton) p);
 		}
 	}
 
-	private void SendPlanktonData(EatableObj p) {
+	private void SendPlanktonData(Plankton p) {
 		StringBuilder buf = new StringBuilder();
 		buf.append("Pop ");
 		buf.append(p.localId);
@@ -212,6 +225,8 @@ public class MyClient {
 		buf.append(p.current.x);
 		buf.append(" ");
 		buf.append(p.current.y);
+		buf.append(" ");
+		buf.append(p.isVirus() ? 1 : 0);
 		SendMessage(buf.toString());
 	}
 
@@ -296,25 +311,40 @@ public class MyClient {
 					continue;
 				}
 
-				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3
-						&& planaria.size < p.size * 0.9) {
-					Eat(p, player.playerID, planaria.localId, planaria.size);
+				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3) {
+					if (planaria.size < p.size * 0.9) {
+						Eat(p, player.playerID, planaria);
+					} else if (myNumberInt == player.playerID) {
+						int x = p.current.x - planaria.current.x;
+						int y = p.current.y - planaria.current.y;
+
+						double diff = Math.hypot(x, y);
+
+						x = (int) (x / diff * (p.size + planaria.size) / 4);
+						y = (int) (y / diff * (p.size + planaria.size) / 4);
+
+						p.setData(planaria.current.x + x, planaria.current.y + y, -1);
+					}
 				}
 			}
 		}
 	}
 
-	public void Eat(Planaria myPlanaria, int userID, int planariaID, int size) {
+	public void Eat(Planaria myPlanaria, int userID, EatableObj p) {
 		if (userID != myNumberInt) {
 			if (userID == 0) {
-				size = planktonScore;
+				p.size = planktonScore;
+
+				if (((Plankton) p).isVirus()) {
+					drow.VirusSpilit(myPlanaria);
+				}
 			}
-			score += size;
+			score += p.size;
 		}
 
-		myPlanaria.setData(-1, -1, myPlanaria.size + size);
-		Delete(userID, planariaID);
-		SendMessage("Delete " + userID + " " + planariaID);
+		myPlanaria.setData(-1, -1, myPlanaria.size + p.size);
+		Delete(userID, p.localId);
+		SendMessage("Delete " + userID + " " + p.localId);
 
 		if (userID == 0) {
 			AUDIO.EAT_1.play();

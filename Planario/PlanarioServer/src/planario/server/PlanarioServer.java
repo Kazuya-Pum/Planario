@@ -80,7 +80,6 @@ class PlanarioServer {
 	}
 
 	// mainプログラム
-	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		// 必要な配列を確保する
 		incoming = new Socket[maxConnection];
@@ -93,9 +92,9 @@ class PlanarioServer {
 		int n = 1;
 		member = 0;// 誰も接続していないのでメンバー数は０
 
-		try {
+		try(ServerSocket server = new ServerSocket(10000)) {
+			// 10000番ポートを利用する
 			System.out.println("The Planar.io Server has launched!");
-			ServerSocket server = new ServerSocket(10000);// 10000番ポートを利用する
 			while (true) {
 				incoming[n] = server.accept();
 				flag[n] = true;
