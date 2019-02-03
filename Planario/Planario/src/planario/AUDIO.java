@@ -14,6 +14,8 @@ public enum AUDIO {
 	BGM("res/garden.wav"), EAT_1("res/se1.wav"), EAT_2("res/se2.wav"), END("res/se3.wav"), PON("res/pon.wav");
 
 	private Clip clip;
+	private static boolean activeSE = true;
+	private static boolean activeBGM = true;
 
 	private AUDIO(String path) {
 		try (AudioInputStream ais = AudioSystem.getAudioInputStream(LoadManager.getUrl(path))) {
@@ -31,7 +33,36 @@ public enum AUDIO {
 		}
 	}
 
+	public static boolean toggleSE() {
+		activeSE = (activeSE) ? false : true;
+		return activeSE;
+	}
+
+	public static boolean toggleBGM() {
+		activeBGM = (activeBGM) ? false : true;
+
+		if (activeBGM) {
+			BGM.loop();
+		} else {
+			BGM.clip.stop();
+		}
+
+		return activeBGM;
+	}
+
+	public static boolean getActiveSE() {
+		return activeSE;
+	}
+
+	public static boolean getActiveBGM() {
+		return activeBGM;
+	}
+
 	public void play() {
+		if (!activeSE) {
+			return;
+		}
+
 		if (clip.isRunning()) {
 			clip.stop();
 		}
@@ -40,6 +71,10 @@ public enum AUDIO {
 	}
 
 	public void loop() {
+		if (!activeBGM) {
+			return;
+		}
+
 		clip.loop(Clip.LOOP_CONTINUOUSLY);
 	}
 
@@ -50,7 +85,7 @@ public enum AUDIO {
 	public void restart() {
 		clip.flush();
 		clip.setFramePosition(0);
-		clip.loop(Clip.LOOP_CONTINUOUSLY);
+		loop();
 	}
 
 	static void init() {

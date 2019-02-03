@@ -11,7 +11,7 @@ public abstract class EatableObj extends Resizable {
 	private static final long serialVersionUID = 1L;
 
 	public int size;
-	public int localId;
+	protected int localId;
 	public Point current = new Point();
 
 	public EatableObj(BufferedImage buffimg, int x, int y, int size) {
@@ -36,11 +36,12 @@ public abstract class EatableObj extends Resizable {
 
 	}
 
+	@Override
 	public void setBounds(int x, int y, int width, int height) {
 		super.setBounds(x - (width / 2), y - (height / 2), width, height);
 	}
 
-	public int getVisualSize() {
-		return size / 3;
+	public int getID() {
+		return localId;
 	}
 }

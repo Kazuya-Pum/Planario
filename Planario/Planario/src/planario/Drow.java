@@ -17,25 +17,27 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private GameOverPanel gameOver;
 	private FieldPane field;
 
-	private static final int MAX_PLANKTON = 200;
-	private static final int VIRUS = 90;
+	public static final int FPS = 30;
+	private static final int VIRUS = 90; // ウイルスのサイズ
+	private static final int SHRINK = 2000 / FPS; // 縮小スピード
+	private static final int SHRINK_SIZE = 100; // 縮小が始まるサイズ
+	private int shrinkCount = 0;
 
-	MediaTracker tracker;
-	public BufferedImage[] skins = new BufferedImage[1];
+	private MediaTracker tracker;
+	public BufferedImage[] skins;
 	private BufferedImage planktonSkin;
 	private BufferedImage virusSkin;
-	public double Vector2[] = new double[2];
 
-	public int fps = 30;
+	private Point mouse = new Point();
+	private double Vector2[] = new double[2]; // 正規化したカーソル位置
 
 	MyClient mc;
 
-	Dimension dr;
+	private Dimension dr;
 
-	boolean init = false;
+	private boolean init = false;
 
-	Random random = new Random();
-	private Point mouse = new Point();
+	private Random random = new Random();
 
 	public class DrowThread extends Thread {
 		public void run() {
@@ -61,15 +63,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 					MyUpdate();
 					OtherUpdate();
 
-					if (mc.planktons.getSize() <= MAX_PLANKTON && random.nextInt(10) <= 1) {
-						mc.Pop(false);
-						if (random.nextInt(20) == 0) {
-							mc.Pop(true);
-						}
-					}
-
 					repaint();
-					sleep(fps);
+					sleep(FPS);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -85,6 +80,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		centerPoint.y = 0;
 
 		int count = 0;
+		shrinkCount++;
 
 		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
@@ -98,6 +94,15 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 			mc.Search(p);
 			count++;
+
+			int shrinkRate = p.size / SHRINK_SIZE;
+			if (shrinkCount >= SHRINK && shrinkRate > 0) {
+				p.size -= shrinkRate;
+			}
+		}
+
+		if (shrinkCount >= SHRINK) {
+			shrinkCount = 0;
 		}
 
 		if (count == 0) {
@@ -125,7 +130,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private void OtherUpdate() {
 
 		for (PlayerData player : mc.playerData.values()) {
-			if (player.playerID == 0) {
+			if (player.getID() == 0) {
 				continue;
 			}
 
@@ -185,33 +190,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		init = true;
 	}
 
-	public void setTitlePane() {
-		if (title == null) {
-			title = new TitlePanel(mc, dr.width, dr.height);
-		}
-
-		title.setNewSize(dr);
-		contentPane.add(title);
-		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
-		title.ipStr.requestFocus();
-	}
-
-	public void hideTilePane() {
-		try {
-			requestFocus();
-			contentPane.remove(title);
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-	}
-
 	private void ImportSkins() {
 		planktonSkin = LoadManager.getBuffImg("res/plankton.png");
 		tracker.addImage(planktonSkin, 0);
 		virusSkin = LoadManager.getBuffImg("res/virus.png");
 		tracker.addImage(virusSkin, 1);
-		skins[0] = LoadManager.getBuffImg("res/planaria.png");
-		tracker.addImage(skins[0], 2);
+		skins = new BufferedImage[] { LoadManager.getBuffImg("res/planaria.png", tracker) };
 
 		try {
 			tracker.waitForAll();
@@ -248,7 +232,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
 		Planaria planaria = new Planaria(skins[skin], skin, x, y, size, planariaID);
 
-		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
+		mc.GetPlayer(playerID).planariaData.put(planaria.getID(), planaria);
 		field.add(planaria);
 		field.setLayer(planaria, JLayeredPane.PALETTE_LAYER);
 
@@ -335,6 +319,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		}
 	}
 
+	// 正規化
 	private void normalize(int x, int y) {
 		double mag = Math.hypot(x, y);
 
@@ -344,6 +329,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		Vector2[1] = y * dist / mag;
 	}
 
+	// tでfromとtoの間を補間
 	private int Lerp(int from, int to, float t) {
 		boolean positive = from < to;
 
@@ -352,6 +338,26 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		value *= (positive) ? 1 : -1;
 
 		return from + value;
+	}
+
+	public void setTitlePane() {
+		if (title == null) {
+			title = new TitlePanel(mc, dr.width, dr.height);
+		}
+
+		title.setNewSize(dr);
+		contentPane.add(title);
+		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
+		title.ipStr.requestFocus();
+	}
+
+	public void hideTilePane() {
+		try {
+			requestFocus();
+			contentPane.remove(title);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 
 	public void setGameOver() {
@@ -380,7 +386,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-
 	}
 
 	@Override
@@ -390,19 +395,19 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
-
 	}
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
-
 	}
 
+	// 画面サイズ変更イベント
 	@Override
 	public void componentResized(ComponentEvent e) {
 		dr = contentPane.getSize();
 
 		if (!init) {
+			// contentPaneがレンダリングされ、サイズが取得できたタイミングで初期化
 			initialize();
 		} else {
 			gameOver.setSize(dr);
@@ -412,7 +417,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-
 	}
 
 	@Override
@@ -424,11 +428,9 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-
 	}
 }

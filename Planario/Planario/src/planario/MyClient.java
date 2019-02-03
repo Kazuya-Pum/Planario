@@ -1,7 +1,6 @@
 package planario;
 
 import java.net.*;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.awt.Point;
@@ -32,43 +31,63 @@ public class MyClient {
 
 	public void Access(String serverIP) {
 
-		// 重複してメソッドを実行させないようにフラグで管理
-		if (accessFlag) {
-			return;
-		} else {
-			accessFlag = true;
-		}
 
-		String myName = "";
+			// 重複してメソッドを実行させないようにフラグで管理
+			if (accessFlag) {
+				return;
+			} else {
+				accessFlag = true;
+			}
 
-		if (serverIP.equals("")) {
-			serverIP = "localhost";
-		}
+			String myName = "";
 
-		// サーバに接続する
-		Socket socket = null;
-		try {
-			// "localhost"は，自分内部への接続．localhostを接続先のIP
-			// Address（"133.42.155.201"形式）に設定すると他のPCのサーバと通信できる
-			// 10000はポート番号．IP Addressで接続するPCを決めて，ポート番号でそのPC上動作するプログラムを特定する
-			socket = new Socket(serverIP, 10000);
-		} catch (Exception e) {
-			System.err.println("エラーが発生しました: " + e);
-			drow.title.setErrorMsg("サーバーに接続できません");
-			accessFlag = false;
-			return;
-		}
+			if (serverIP.equals("")) {
+				serverIP = "localhost";
+			}
 
-		playerData.put(0, new PlayerData(0));
-		planktons = GetPlayer(0);
+			// サーバに接続する
+			Socket socket = null;
+			try {
+				InetSocketAddress endpoint = new InetSocketAddress(serverIP, 10000);
+				socket = new Socket();
+				socket.connect(endpoint, 4000); // 4000msでtimeout
+			} catch (SocketTimeoutException e) {
+				System.err.println("エラーが発生しました: " + e);
+				drow.title.setErrorMsg("タイムアウトしました");
+				accessFlag = false;
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				return;
+			} catch (UnknownHostException e) {
+				System.err.println("エラーが発生しました: " + e);
+				drow.title.setErrorMsg("ホストを特定できません");
+				accessFlag = false;
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				return;
+			} catch (Exception e) {
+				System.err.println("エラーが発生しました: " + e);
+				drow.title.setErrorMsg("サーバーに接続できません");
+				accessFlag = false;
+				return;
+			}
 
-		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
-		mrt.start();// スレッドを動かす（Runが動く）
+			playerData.put(0, new PlayerData(0));
+			planktons = GetPlayer(0);
 
-		mst = new MesgSendThread(this);
+			MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
+			mrt.start();// スレッドを動かす（Runが動く）
 
-		drow.title.hideErrorMsg();
-		drow.hideTilePane();
+			mst = new MesgSendThread(this);
+
+			drow.title.hideErrorMsg();
+			drow.hideTilePane();
 	}
 
 	// メッセージ受信のためのスレッド
@@ -101,7 +120,6 @@ public class MyClient {
 				while (true) {
 					String inputLine = br.readLine();// データを一行分だけ読み込んでみる
 					if (inputLine != null) {// 読み込んだときにデータが読み込まれたかどうかをチェックする
-						System.out.println(inputLine);// デバッグ（動作確認用）にコンソールに出力する
 						String[] inputTokens = inputLine.split(" "); // 入力データを解析するために、スペースで切り分ける
 						String cmd = inputTokens[0];// コマンドの取り出し．１つ目の要素を取り出す
 
@@ -196,40 +214,6 @@ public class MyClient {
 		}
 	}
 
-	Random random = new Random();
-
-	public void Pop(boolean virus) {
-		Plankton plankton;
-
-		if (virus) {
-			plankton = drow.PopVirus(random.nextInt(fieldSize), random.nextInt(fieldSize));
-		} else {
-			plankton = drow.PopPlankton(random.nextInt(fieldSize), random.nextInt(fieldSize));
-		}
-		planktons.planariaData.put(plankton.localId, plankton);
-
-		SendPlanktonData(plankton);
-	}
-
-	public void LoadPlankton() {
-		for (EatableObj p : planktons.planariaData.values()) {
-			SendPlanktonData((Plankton) p);
-		}
-	}
-
-	private void SendPlanktonData(Plankton p) {
-		StringBuilder buf = new StringBuilder();
-		buf.append("Pop ");
-		buf.append(p.localId);
-		buf.append(" ");
-		buf.append(p.current.x);
-		buf.append(" ");
-		buf.append(p.current.y);
-		buf.append(" ");
-		buf.append(p.isVirus() ? 1 : 0);
-		SendMessage(buf.toString());
-	}
-
 	public PlayerData GetPlayer(int userID) {
 		if (playerData.containsKey(userID)) {
 			return playerData.get(userID);
@@ -248,19 +232,6 @@ public class MyClient {
 	public PlayerData Join(int ID) {
 		PlayerData p = new PlayerData(ID);
 		playerData.put(ID, p);
-
-		Object[] pArray = playerData.keySet().toArray();
-		Arrays.sort(pArray);
-
-		for (int i : playerData.keySet()) {
-			if (i == 0) {
-				continue;
-			}
-			if (i == myNumberInt && ID != myNumberInt) {
-				LoadPlankton();
-			}
-			break;
-		}
 
 		return p;
 	}
@@ -284,7 +255,7 @@ public class MyClient {
 			out.println(msg);
 			out.flush();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 		}
 	}
 
@@ -293,7 +264,7 @@ public class MyClient {
 		buf.append("Update ");
 		buf.append(myNumberInt);
 		buf.append(" ");
-		buf.append(p.localId);
+		buf.append(p.getID());
 		buf.append(" ");
 		buf.append(p.current.x);
 		buf.append(" ");
@@ -313,8 +284,8 @@ public class MyClient {
 
 				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3) {
 					if (planaria.size < p.size * 0.9) {
-						Eat(p, player.playerID, planaria);
-					} else if (myNumberInt == player.playerID) {
+						Eat(p, player.getID(), planaria);
+					} else if (myNumberInt == player.getID()) {
 						int x = p.current.x - planaria.current.x;
 						int y = p.current.y - planaria.current.y;
 
@@ -343,8 +314,8 @@ public class MyClient {
 		}
 
 		myPlanaria.setData(-1, -1, myPlanaria.size + p.size);
-		Delete(userID, p.localId);
-		SendMessage("Delete " + userID + " " + p.localId);
+		Delete(userID, p.getID());
+		SendMessage("Delete " + userID + " " + p.getID());
 
 		if (userID == 0) {
 			AUDIO.EAT_1.play();
@@ -373,7 +344,7 @@ public class MyClient {
 	private boolean canSpawn(int x, int y) {
 
 		for (PlayerData player : playerData.values()) {
-			if (player.playerID == 0) {
+			if (player.getID() == 0) {
 				continue;
 			}
 

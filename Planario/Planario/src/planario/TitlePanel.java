@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.*;
 
 public class TitlePanel extends JLayeredPane implements ActionListener {
@@ -44,13 +45,11 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		playButton.setPressedIcon(LoadManager.getIcon("res/pressPlay.png"));
 		playButton.setBounds(100, 300, 300, 140);
 		menu.add(playButton);
-		setLayer(playButton, JLayeredPane.PALETTE_LAYER);
 
 		ipStr = new IpText();
 		ipStr.setBounds(100, 250, 300, 50);
 		menu.add(ipStr);
 		ipStr.setOpaque(false);
-		setLayer(ipStr, JLayeredPane.PALETTE_LAYER);
 		ipStr.setPlaceholder("localhost");
 		ipStr.setFont(new Font("ＭＳ ゴシック", Font.PLAIN, 30));
 		ipStr.addActionListener(this);
@@ -58,9 +57,55 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText = new JLabel("エラーメッセージ");
 		errorText.setBounds(100, 200, 300, 50);
 		errorText.setOpaque(false);
-		errorText.setFont(new Font("ＭＳ ゴシック", Font.BOLD, 20));
+		errorText.setFont(new Font("BIZ UDゴシック", Font.BOLD, 20));
 		errorText.setForeground(new Color(255, 0, 0));
 		errorText.setHorizontalAlignment(JLabel.CENTER);
+
+		Icon seOn = LoadManager.getIcon("res/seOn.png");
+		Icon seOff = LoadManager.getIcon("res/seOff.png");
+		JButton se = new JButton(seOn);
+		se.setBounds(400, 310, 50, 50);
+		se.setBorderPainted(false);
+		se.setOpaque(false);
+
+		se.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				AUDIO.toggleSE();
+
+				if (AUDIO.getActiveSE()) {
+					se.setIcon(seOn);
+				} else {
+					se.setIcon(seOff);
+				}
+			}
+		});
+
+		menu.add(se);
+
+		Icon bgmOn = LoadManager.getIcon("res/bgmOn.png");
+		Icon bgmOff = LoadManager.getIcon("res/bgmOff.png");
+		JButton bgm = new JButton(bgmOn);
+		bgm.setBounds(400, 360, 50, 50);
+		bgm.setBorderPainted(false);
+		bgm.setOpaque(false);
+
+		bgm.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				AUDIO.toggleBGM();
+
+				if (AUDIO.getActiveBGM()) {
+					bgm.setIcon(bgmOn);
+				} else {
+					bgm.setIcon(bgmOff);
+				}
+			}
+		});
+
+		menu.add(bgm);
 
 	}
 
