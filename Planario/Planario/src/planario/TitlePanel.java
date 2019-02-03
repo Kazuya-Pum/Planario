@@ -18,7 +18,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public IpText ipStr;
+	private IpText ipStr;
 	private MyClient mc;
 	private JLabel menu;
 	private JLabel errorText;
@@ -120,6 +120,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText.setText(msg);
 		menu.add(errorText);
 		setLayer(errorText, JLayeredPane.PALETTE_LAYER);
+		repaint();
 	}
 
 	public void hideErrorMsg() {
@@ -133,6 +134,10 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	public void setNewSize(Dimension dr) {
 		setSize(dr);
 		menu.setLocation(dr.width / 2 - menu.getSize().width / 2, dr.height / 2 - menu.getSize().height / 2);
+	}
+
+	public void focusIpText() {
+		ipStr.requestFocus();
 	}
 
 	public class IpText extends JTextField {

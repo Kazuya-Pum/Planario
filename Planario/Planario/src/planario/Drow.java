@@ -33,7 +33,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 	MyClient mc;
 
-	private Dimension dr;
+	private Dimension dr; // 画面サイズ
 
 	private boolean init = false;
 
@@ -97,6 +97,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 			int shrinkRate = p.size / SHRINK_SIZE;
 			if (shrinkCount >= SHRINK && shrinkRate > 0) {
+				// 経過時間とサイズが一定以上の時縮小
 				p.size -= shrinkRate;
 			}
 		}
@@ -105,11 +106,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			shrinkCount = 0;
 		}
 
-		if (count == 0) {
-			return;
-		}
-
-		try {
+		if (count > 0) {
 			centerPoint.x /= count;
 			centerPoint.y /= count;
 
@@ -121,9 +118,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 			prevCenter.x = centerPoint.x;
 			prevCenter.y = centerPoint.y;
-
-		} catch (ArithmeticException e) {
-
 		}
 	}
 
@@ -175,18 +169,15 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	}
 
 	private void initialize() {
-		dr = contentPane.getSize();
-
 		setTitlePane();
 
-		field = new FieldPane(mc.fieldSize);
+		field = new FieldPane(MyClient.fieldSize);
 		contentPane.add(field);
 		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
 
 		gameOver = new GameOverPanel(dr.width, dr.height, this);
 
 		repaint();
-
 		init = true;
 	}
 
@@ -218,8 +209,8 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	}
 
 	private void posUpdate(Planaria planaria) {
-		planaria.nextX = (planaria.nextX > mc.fieldSize) ? mc.fieldSize : planaria.nextX;
-		planaria.nextY = (planaria.nextY > mc.fieldSize) ? mc.fieldSize : planaria.nextY;
+		planaria.nextX = (planaria.nextX > MyClient.fieldSize) ? MyClient.fieldSize : planaria.nextX;
+		planaria.nextY = (planaria.nextY > MyClient.fieldSize) ? MyClient.fieldSize : planaria.nextY;
 
 		planaria.current.x = Lerp(planaria.current.x, planaria.nextX, 0.25f);
 		planaria.current.y = Lerp(planaria.current.y, planaria.nextY, 0.25f);
@@ -239,20 +230,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		return planaria;
 	}
 
-	public Plankton PopPlankton(int x, int y) {
-		return PopPlankton(x, y, -1);
-	}
-
 	public Plankton PopPlankton(int x, int y, int id) {
 		Plankton plankton = new Plankton(planktonSkin, x, y, mc.planktonSize, id);
 
 		field.add(plankton);
 
 		return plankton;
-	}
-
-	public Plankton PopVirus(int x, int y) {
-		return PopVirus(x, y, -1);
 	}
 
 	public Plankton PopVirus(int x, int y, int id) {
@@ -348,7 +331,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		title.setNewSize(dr);
 		contentPane.add(title);
 		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
-		title.ipStr.requestFocus();
+		title.focusIpText();
 	}
 
 	public void hideTilePane() {
@@ -380,7 +363,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		try {
 			contentPane.remove(gameOver);
 		} catch (Exception e) {
-
+			System.err.println(e.getMessage());
 		}
 	}
 

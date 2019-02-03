@@ -9,20 +9,20 @@ import java.io.*;
 public class MyClient {
 	PrintWriter out;// 出力用のライター
 
-	ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
-	int myNumberInt;
+	public ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
+	public int myNumberInt;
 	Drow drow;
-	int planktonSize = 10;
-	int planktonScore = 1;
-	int defualtSize = 30;
+	final int planktonSize = 10;
+	final int planktonScore = 1;
+	final int defualtSize = 30;
 	PlayerData planktons;
-	int fieldSize = 4000;
-	int score = 0;
-	boolean loginFlag = false;
+	public static final int fieldSize = 4000;
+	public int score = 0;
+	public boolean loginFlag = false;
 
 	MesgSendThread mst;
 
-	static boolean accessFlag = false;
+	private static boolean accessFlag = false;
 
 	public MyClient() {
 		drow = new Drow(this);
@@ -31,63 +31,55 @@ public class MyClient {
 
 	public void Access(String serverIP) {
 
+		// 重複してメソッドを実行させないようにフラグで管理
+		if (accessFlag) {
+			return;
+		} else {
+			accessFlag = true;
+		}
 
-			// 重複してメソッドを実行させないようにフラグで管理
-			if (accessFlag) {
-				return;
-			} else {
-				accessFlag = true;
+		String myName = "";
+
+		if (serverIP.equals("")) {
+			serverIP = "localhost";
+		}
+
+		// サーバに接続する
+		Socket socket = null;
+		try {
+			InetSocketAddress endpoint = new InetSocketAddress(serverIP, 10000);
+			socket = new Socket();
+			socket.connect(endpoint, 4000); // 4000msでtimeout
+		} catch (Exception e) {
+			System.err.println("エラーが発生しました: " + e);
+
+			String err;
+			switch (e.getClass().getSimpleName()) {
+			case "SocketTimeoutException":
+				err = "タイムアウトしました";
+				break;
+			case "UnknownHostException":
+				err = "ホストを特定できません";
+				break;
+			default:
+				err = "サーバーに接続できません";
 			}
 
-			String myName = "";
+			drow.title.setErrorMsg(err);
+			accessFlag = false;
+			return;
+		}
 
-			if (serverIP.equals("")) {
-				serverIP = "localhost";
-			}
+		playerData.put(0, new PlayerData(0));
+		planktons = GetPlayer(0);
 
-			// サーバに接続する
-			Socket socket = null;
-			try {
-				InetSocketAddress endpoint = new InetSocketAddress(serverIP, 10000);
-				socket = new Socket();
-				socket.connect(endpoint, 4000); // 4000msでtimeout
-			} catch (SocketTimeoutException e) {
-				System.err.println("エラーが発生しました: " + e);
-				drow.title.setErrorMsg("タイムアウトしました");
-				accessFlag = false;
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				return;
-			} catch (UnknownHostException e) {
-				System.err.println("エラーが発生しました: " + e);
-				drow.title.setErrorMsg("ホストを特定できません");
-				accessFlag = false;
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				return;
-			} catch (Exception e) {
-				System.err.println("エラーが発生しました: " + e);
-				drow.title.setErrorMsg("サーバーに接続できません");
-				accessFlag = false;
-				return;
-			}
+		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
+		mrt.start();// スレッドを動かす（Runが動く）
 
-			playerData.put(0, new PlayerData(0));
-			planktons = GetPlayer(0);
+		mst = new MesgSendThread(this);
 
-			MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
-			mrt.start();// スレッドを動かす（Runが動く）
-
-			mst = new MesgSendThread(this);
-
-			drow.title.hideErrorMsg();
-			drow.hideTilePane();
+		drow.title.hideErrorMsg();
+		drow.hideTilePane();
 	}
 
 	// メッセージ受信のためのスレッド

@@ -2,7 +2,6 @@ package planario;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JLayeredPane;
 
 public abstract class Resizable extends JLayeredPane {
@@ -11,7 +10,7 @@ public abstract class Resizable extends JLayeredPane {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	BufferedImage buffimg;
+	private BufferedImage buffimg;
 
 	public Resizable(BufferedImage buffimg) {
 		this.buffimg = buffimg;

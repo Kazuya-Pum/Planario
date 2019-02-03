@@ -66,7 +66,7 @@ class PlanarioServer {
 	private static ConcurrentHashMap<Integer, ClientProcThread> myClientProcThread;
 	private static int member;// 接続しているメンバーの数
 
-	private static PopThread plankton;
+	private static PopThread plankton;	// プランクトンを生成するスレッド
 
 	// 全員にメッセージを送る
 	public static void SendAll(String str, String myName) {
@@ -77,6 +77,7 @@ class PlanarioServer {
 		}
 	}
 
+	// プランクトンのデータを指定のクライアントに送信する
 	public static void sendAllPlankton(PrintWriter myOut) {
 		for (Plankton p : PopThread.planktonData.values()) {
 			myOut.println(p.toString());
@@ -84,6 +85,7 @@ class PlanarioServer {
 		}
 	}
 
+	// クライアントの情報を削除する
 	public static void removeClient(int n) {
 		myClientProcThread.remove(n);
 		member = myClientProcThread.size();
@@ -91,11 +93,10 @@ class PlanarioServer {
 
 	// mainプログラム
 	public static void main(String[] args) {
-		// 必要な配列を確保する
 		myClientProcThread = new ConcurrentHashMap<Integer, ClientProcThread>();
 
 		int n = 1;
-//		member = 0;// 誰も接続していないのでメンバー数は０
+		member = 0;// 誰も接続していないのでメンバー数は０
 
 		try (ServerSocket server = new ServerSocket(10000)) {
 			// 10000番ポートを利用する
