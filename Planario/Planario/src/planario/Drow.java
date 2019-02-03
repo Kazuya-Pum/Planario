@@ -1,83 +1,70 @@
 package planario;
 
-import java.awt.Dimension;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Point;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
-public class Drow extends JFrame implements MouseListener, MouseMotionListener, ComponentListener, KeyListener {
+public class Drow extends JFrame implements MouseMotionListener, ComponentListener, KeyListener {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private JPanel panel;
-	private JPanel backGound;
-	MediaTracker tracker;
-	public ImageIcon[] skins = new ImageIcon[3];
-	public float Vector2[] = new float[2];
+	private JLayeredPane contentPane;
+	public TitlePanel title;
+	private GameOverPanel gameOver;
+	private FieldPane field;
 
-	public int fps = 30;
+	public static final int FPS = 30;
+	private static final int VIRUS = 90; // ウイルスのサイズ
+	private static final int SHRINK = 2000 / FPS; // 縮小スピード
+	private static final int SHRINK_SIZE = 100; // 縮小が始まるサイズ
+	private int shrinkCount = 0;
+
+	private MediaTracker tracker;
+	public BufferedImage[] skins;
+	private BufferedImage planktonSkin;
+	private BufferedImage virusSkin;
+
+	private Point mouse = new Point();
+	private double Vector2[] = new double[2]; // 正規化したカーソル位置
 
 	MyClient mc;
 
-	Dimension dr;
+	private Dimension dr;
 
-	boolean loginFlag = false;
+	private boolean init = false;
 
-	Random random = new Random();
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Drow frame = new Drow();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private Random random = new Random();
 
 	public class DrowThread extends Thread {
 		public void run() {
 			try {
 				System.out.println("nowLoading");
-				while (!loginFlag) {
+				while (!init) {
 					sleep(10);
 				}
 				System.out.println("ok");
+				AUDIO.BGM.restart();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			while (true) {
+
+			mc.loginFlag = true;
+
+			mc.mst.start();
+
+			while (mc.loginFlag) {
 				try {
 					tracker.waitForAll();
 
 					MyUpdate();
 					OtherUpdate();
 
-					if (random.nextInt(10) == 0) {
-						mc.Pop();
-					}
-
 					repaint();
-					sleep(fps);
+					sleep(FPS);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -85,19 +72,41 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-	private void MyUpdate() {
-		Point centerPoint = new Point();
+	Point centerPoint = new Point();
+	Point prevCenter = new Point();
 
-		int count = mc.GetPlayer(mc.myNumberInt).planariaData.size();
-		Planaria[] tmp = new Planaria[count];
-		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
-		for (Planaria p : tmp) {
-			p.setData(p.posX + (int) (Vector2[0] * p.speed), p.posY + (int) (Vector2[1] * p.speed), -1);
-			Update(p);
-			centerPoint.x += p.posX;
-			centerPoint.y += p.posY;
+	private void MyUpdate() {
+		centerPoint.x = 0;
+		centerPoint.y = 0;
+
+		int count = 0;
+		shrinkCount++;
+
+		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
+
+			Planaria p = (Planaria) c;
+			normalize(mouse.x - prevCenter.x - p.current.x, mouse.y - prevCenter.y - p.current.y);
+
+			p.setData(p.nextX + (int) (Vector2[0] * p.getSpeed()), p.nextY + (int) (Vector2[1] * p.getSpeed()), -1);
+			posUpdate(p);
+			centerPoint.x += p.current.x;
+			centerPoint.y += p.current.y;
 
 			mc.Search(p);
+			count++;
+
+			int shrinkRate = p.size / SHRINK_SIZE;
+			if (shrinkCount >= SHRINK && shrinkRate > 0) {
+				p.size -= shrinkRate;
+			}
+		}
+
+		if (shrinkCount >= SHRINK) {
+			shrinkCount = 0;
+		}
+
+		if (count == 0) {
+			return;
 		}
 
 		try {
@@ -108,26 +117,25 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 			centerPoint.y -= dr.height / 2;
 			centerPoint.x *= -1;
 			centerPoint.y *= -1;
-			panel.setLocation(centerPoint);
-			backGound.setLocation(centerPoint);
+			field.setLocation(centerPoint);
+
+			prevCenter.x = centerPoint.x;
+			prevCenter.y = centerPoint.y;
+
 		} catch (ArithmeticException e) {
 
 		}
 	}
 
 	private void OtherUpdate() {
-		PlayerData[] tmpPlayer = new PlayerData[mc.playerData.size()];
-		mc.playerData.values().toArray(tmpPlayer);
 
-		for (PlayerData player : tmpPlayer) {
-			if (player.playerID == mc.myNumberInt || player.playerID == 0) {
+		for (PlayerData player : mc.playerData.values()) {
+			if (player.getID() == 0) {
 				continue;
 			}
 
-			Planaria[] tmpPlanaria = new Planaria[player.planariaData.size()];
-			player.planariaData.values().toArray(tmpPlanaria);
-			for (Planaria p : tmpPlanaria) {
-				Update(p);
+			for (EatableObj p : player.planariaData.values()) {
+				Update((Planaria) p);
 			}
 		}
 	}
@@ -137,8 +145,11 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public void Login() {
-		Create(1, 800, 500, 100);
-		loginFlag = true;
+		Point spawnPoint = mc.searchSpawnPoint();
+
+		Create(mc.GetPlayer(mc.myNumberInt).skin, spawnPoint.x, spawnPoint.y, mc.defualtSize);
+		DrowThread dt = new DrowThread();
+		dt.start();
 	}
 
 	/**
@@ -151,76 +162,67 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		ImportSkins();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1024, 640);
+		setSize(1024, 640);
+		setLocationRelativeTo(null);
 		setTitle("Planar.io");
 
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane = new JLayeredPane();
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		contentPane.addMouseListener(this);
 		contentPane.addMouseMotionListener(this);
 		contentPane.addComponentListener(this);
 		addKeyListener(this);
+	}
+
+	private void initialize() {
 		dr = contentPane.getSize();
 
-		panel = new JPanel();
-		panel.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
-		panel.setOpaque(false);
-		contentPane.add(panel);
-		panel.setLayout(null);
+		setTitlePane();
 
-		backGound = new JPanel();
-		backGound.setBounds(0, 0, mc.fieldSize, mc.fieldSize);
-		contentPane.add(backGound);
+		field = new FieldPane(mc.fieldSize);
+		contentPane.add(field);
+		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
 
-		JLabel backGoundLabel = new JLabel(ResizeIcon(0, mc.fieldSize));
-		backGound.add(backGoundLabel);
+		gameOver = new GameOverPanel(dr.width, dr.height, this);
 
-		DrowThread dt = new DrowThread();
-		dt.start();
+		repaint();
+
+		init = true;
 	}
 
 	private void ImportSkins() {
-		skins[0] = new ImageIcon("mizuumi.png");
-		skins[1] = new ImageIcon("planaria.png");
-		skins[2] = new ImageIcon("plankton.png");
-		skins[2] = ResizeIcon(2, 10);
-	}
+		planktonSkin = LoadManager.getBuffImg("res/plankton.png");
+		tracker.addImage(planktonSkin, 0);
+		virusSkin = LoadManager.getBuffImg("res/virus.png");
+		tracker.addImage(virusSkin, 1);
+		skins = new BufferedImage[] { LoadManager.getBuffImg("res/planaria.png", tracker) };
 
-	Point current;
-	Point next;
-	int currentSize;
-
-	private void Update(Planaria planaria) {
-		current = planaria.getLocation();
-		next = new Point();
-
-		planaria.posX = (planaria.posX > mc.fieldSize) ? mc.fieldSize : planaria.posX;
-		planaria.posY = (planaria.posY > mc.fieldSize) ? mc.fieldSize : planaria.posY;
-
-		next.x = Lerp(current.x, planaria.posX, 0.25f);
-		next.y = Lerp(current.y, planaria.posY, 0.25f);
-
-		currentSize = planaria.getIcon().getIconWidth();
-		int size = planaria.size / 3;
-		if (currentSize != size) {
-			planaria.setIcon(ResizeIcon(planaria.skin, Lerp(currentSize, size, 0.6f)));
-		}
-
-		planaria.setBounds(next.x, next.y, size, size);
-	}
-
-	private ImageIcon ResizeIcon(int icon, int size) {
-		Image resizeImg = skins[icon].getImage().getScaledInstance(size, -1, Image.SCALE_SMOOTH);
-		tracker.addImage(resizeImg, 1);
 		try {
 			tracker.waitForAll();
 		} catch (InterruptedException e) {
-			System.out.println("error: ResizeIcon");
+			e.printStackTrace();
+		}
+	}
+
+	private int currentSize;
+	private int size;
+
+	private void Update(Planaria planaria) {
+		currentSize = planaria.getSize().width;
+		size = planaria.size;
+		if (currentSize != size) {
+			size = Lerp(currentSize, size, 0.6f);
 		}
 
-		return new ImageIcon(resizeImg);
+		planaria.setBounds(planaria.current.x, planaria.current.y, size, size);
+	}
+
+	private void posUpdate(Planaria planaria) {
+		planaria.nextX = (planaria.nextX > mc.fieldSize) ? mc.fieldSize : planaria.nextX;
+		planaria.nextY = (planaria.nextY > mc.fieldSize) ? mc.fieldSize : planaria.nextY;
+
+		planaria.current.x = Lerp(planaria.current.x, planaria.nextX, 0.25f);
+		planaria.current.y = Lerp(planaria.current.y, planaria.nextY, 0.25f);
 	}
 
 	public Planaria Create(int skin, int x, int y, int size) {
@@ -228,11 +230,11 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
-		Planaria planaria = new Planaria(ResizeIcon(skin, size), skin, x, y, size, planariaID);
-		planaria.setBounds(x, y, size, size);
+		Planaria planaria = new Planaria(skins[skin], skin, x, y, size, planariaID);
 
-		mc.GetPlayer(playerID).planariaData.put(planaria.localId, planaria);
-		panel.add(planaria);
+		mc.GetPlayer(playerID).planariaData.put(planaria.getID(), planaria);
+		field.add(planaria);
+		field.setLayer(planaria, JLayeredPane.PALETTE_LAYER);
 
 		return planaria;
 	}
@@ -242,43 +244,92 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 	public Plankton PopPlankton(int x, int y, int id) {
-		Plankton plankton = new Plankton(skins[2], x, y, mc.planktonSize, id);
-		plankton.setBounds(x, y, mc.planktonSize, mc.planktonSize);
+		Plankton plankton = new Plankton(planktonSkin, x, y, mc.planktonSize, id);
 
-		panel.add(plankton);
+		field.add(plankton);
 
 		return plankton;
 	}
 
-	public void Delete(CanEatObj p) {
+	public Plankton PopVirus(int x, int y) {
+		return PopVirus(x, y, -1);
+	}
+
+	public Plankton PopVirus(int x, int y, int id) {
+		Plankton virus = new Plankton(virusSkin, x, y, VIRUS, id, true);
+
+		field.add(virus);
+		field.setLayer(virus, JLayeredPane.MODAL_LAYER);
+
+		return virus;
+	}
+
+	public void Delete(EatableObj p) {
 		if (p == null) {
 			return;
 		}
-		panel.remove(p);
+		field.remove(p);
+	}
+
+	public void fieldReset() {
+		field.removeAll();
+		repaint();
 	}
 
 	private void Spilit() {
-		Planaria[] tmp = new Planaria[mc.GetPlayer(mc.myNumberInt).planariaData.size()];
-		mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
+		boolean se = false;
+		int count = mc.GetPlayer(mc.myNumberInt).getSize();
+		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
 
-		for (Planaria planaria : tmp) {
-			if (planaria.size / 3 < 30) {
+			Planaria planaria = (Planaria) c;
+			if (planaria.size < mc.defualtSize * 2) {
 				continue;
 			}
 
-			Planaria child = Create(planaria.skin, planaria.posX, planaria.posY, planaria.size / 2);
-			child.setData(planaria.posX + (int) (Vector2[0] * 100), planaria.posY + (int) (Vector2[1] * 100), -1);
+			se = true;
+
 			planaria.setData(-1, -1, planaria.size / 2);
+			Planaria child = Create(planaria.skin, planaria.current.x, planaria.current.y, planaria.size);
+			child.setData(planaria.current.x + (int) (Vector2[0] * 300), planaria.current.y + (int) (Vector2[1] * 300),
+					-1);
+
+			if (--count <= 0) {
+				break;
+			}
+		}
+
+		if (se) {
+			AUDIO.PON.play();
 		}
 	}
 
-	private void normalize(float[] vector) {
-		double mag = Math.hypot(vector[0], vector[1]);
+	public void VirusSpilit(Planaria planaria) {
+		AUDIO.PON.play();
 
-		vector[0] *= 1 / mag;
-		vector[1] *= 1 / mag;
+		int count = planaria.size / mc.defualtSize;
+		count = (count > 5) ? 5 : count;
+
+		int size = planaria.size / count;
+
+		planaria.setData(-1, -1, size);
+		for (int i = 1; i < count; i++) {
+			Planaria child = Create(planaria.skin, planaria.current.x, planaria.current.y, size);
+			child.setData(planaria.current.x + (random.nextInt(11) - 6) * 60,
+					planaria.current.y + (random.nextInt(11) - 6) * 60, size);
+		}
 	}
 
+	// 正規化
+	private void normalize(int x, int y) {
+		double mag = Math.hypot(x, y);
+
+		double dist = (mag > 100) ? 1 : mag / 100;
+
+		Vector2[0] = x * dist / mag;
+		Vector2[1] = y * dist / mag;
+	}
+
+	// tでfromとtoの間を補間
 	private int Lerp(int from, int to, float t) {
 		boolean positive = from < to;
 
@@ -289,69 +340,83 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 		return from + value;
 	}
 
+	public void setTitlePane() {
+		if (title == null) {
+			title = new TitlePanel(mc, dr.width, dr.height);
+		}
+
+		title.setNewSize(dr);
+		contentPane.add(title);
+		contentPane.setLayer(title, JLayeredPane.POPUP_LAYER);
+		title.ipStr.requestFocus();
+	}
+
+	public void hideTilePane() {
+		try {
+			requestFocus();
+			contentPane.remove(title);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public void setGameOver() {
+		if (gameOver == null) {
+			gameOver = new GameOverPanel(dr.width, dr.height, this);
+		}
+
+		gameOver.setScoreText(mc.score);
+		gameOver.setSize(dr);
+		contentPane.add(gameOver);
+		contentPane.setLayer(gameOver, JLayeredPane.MODAL_LAYER);
+		gameOver.requestFocus();
+
+		repaint();
+	}
+
+	public void hideGameOver() {
+		setTitlePane();
+		AUDIO.BGM.restart();
+		try {
+			contentPane.remove(gameOver);
+		} catch (Exception e) {
+
+		}
+	}
+
 	@Override
 	public void mouseDragged(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		Vector2[0] = e.getPoint().x - dr.width / 2;
-		Vector2[1] = e.getPoint().y - dr.height / 2;
-
-		normalize(Vector2);
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO 自動生成されたメソッド・スタブ
-
+		mouse = e.getPoint();
 	}
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 
+	// 画面サイズ変更イベント
 	@Override
 	public void componentResized(ComponentEvent e) {
 		dr = contentPane.getSize();
+
+		if (!init) {
+			// contentPaneがレンダリングされ、サイズが取得できたタイミングで初期化
+			initialize();
+		} else {
+			gameOver.setSize(dr);
+			title.setNewSize(dr);
+		}
 	}
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 
 	@Override
@@ -363,13 +428,9 @@ public class Drow extends JFrame implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 }

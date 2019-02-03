@@ -1,28 +1,33 @@
 package planario;
 
-import javax.swing.ImageIcon;
+import java.awt.image.BufferedImage;
 
-public class Plankton extends CanEatObj {
+public class Plankton extends EatableObj {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	static int id;
+	private static int id;
+	private boolean virus = false;
 
-	public Plankton(ImageIcon icon, int posX, int posY, int size, int id) {
-		super(icon);
-		this.size = size;
+	public Plankton(BufferedImage buffimg, int posX, int posY, int size, int id) {
+		super(buffimg, posX, posY, size);
 
-		this.posX = posX;
-		this.posY = posY;
-
-		if (id != -1) {
+		if (id == -1) {
+			this.localId = ++Plankton.id;
+		} else {
 			this.localId = id;
 			Plankton.id = id;
-		} else {
-			this.localId = ++Planaria.id;
 		}
 	}
 
+	public Plankton(BufferedImage buffimg, int posX, int posY, int size, int id, boolean virus) {
+		this(buffimg, posX, posY, size, id);
+		this.virus = virus;
+	}
+
+	public boolean isVirus() {
+		return virus;
+	}
 }

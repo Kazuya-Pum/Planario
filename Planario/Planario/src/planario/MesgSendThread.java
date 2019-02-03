@@ -1,7 +1,7 @@
 package planario;
 
 public class MesgSendThread extends Thread {
-	MyClient mc;
+	private MyClient mc;
 
 	public MesgSendThread(MyClient mc) {
 		this.mc = mc;
@@ -9,15 +9,12 @@ public class MesgSendThread extends Thread {
 
 	public void run() {
 		try {
-			int count;
-			while(true) {
-				count = mc.GetPlayer(mc.myNumberInt).planariaData.size();
-				Planaria[] tmp = new Planaria[count];
-				mc.GetPlayer(mc.myNumberInt).planariaData.values().toArray(tmp);
-				for (Planaria p : tmp) {
-					mc.SendMyPlanariaData(p);
+			while (mc.loginFlag) {
+				for (EatableObj p : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
+					mc.SendMyPlanariaData((Planaria) p);
 				}
-				sleep(30);
+
+				sleep(Drow.FPS);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
