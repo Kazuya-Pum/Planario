@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import javax.swing.JLayeredPane;
 
-public abstract class Resizable extends JLayeredPane {
+public class Resizable extends JLayeredPane {
 
 	/**
 	 *
@@ -16,12 +16,13 @@ public abstract class Resizable extends JLayeredPane {
 		this.buffimg = buffimg;
 	}
 
+	// パスで指定
 	public Resizable(String path) {
 		this.buffimg = LoadManager.getBuffImg(path);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
-		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
+		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);	// コンポーネントの大きさに合わせてbuffimgが描画される
 	}
 }

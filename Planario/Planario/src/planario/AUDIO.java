@@ -90,7 +90,7 @@ public enum AUDIO {
 	}
 
 	// 初期化
-	static void init() {
+	public static void init() {
 		values();
 	}
 }

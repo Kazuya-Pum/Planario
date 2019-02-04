@@ -16,7 +16,7 @@ public class MyClient {
 	final int planktonScore = 1;
 	final int defualtSize = 30;
 	PlayerData planktons;
-	public static final int fieldSize = 4000;
+	public static int fieldSize = 4000;
 	public int score = 0;
 	public boolean loginFlag = false;
 
@@ -37,8 +37,6 @@ public class MyClient {
 		} else {
 			accessFlag = true;
 		}
-
-		String myName = "";
 
 		if (serverIP.equals("")) {
 			serverIP = "localhost";
@@ -73,7 +71,7 @@ public class MyClient {
 		playerData.put(0, new PlayerData(0));
 		planktons = GetPlayer(0);
 
-		MesgRecvThread mrt = new MesgRecvThread(socket, myName);// 受信用のスレッドを作成する
+		MesgRecvThread mrt = new MesgRecvThread(socket);// 受信用のスレッドを作成する
 		mrt.start();// スレッドを動かす（Runが動く）
 
 		mst = new MesgSendThread(this);
@@ -86,11 +84,9 @@ public class MyClient {
 	public class MesgRecvThread extends Thread {
 
 		Socket socket;
-		String myName;
 
-		public MesgRecvThread(Socket s, String n) {
+		public MesgRecvThread(Socket s) {
 			socket = s;
-			myName = n;
 		}
 
 		// 通信状況を監視し，受信データによって動作する
@@ -99,15 +95,19 @@ public class MyClient {
 				InputStreamReader sisr = new InputStreamReader(socket.getInputStream());
 				BufferedReader br = new BufferedReader(sisr);
 				out = new PrintWriter(socket.getOutputStream(), true);
-				out.println(myName);// 接続の最初に名前を送る
+
+				int skin = SKINS.getSelect();
+				out.println(skin);// 接続の最初にskin番号を送る
 
 				myNumberInt = GetMyNumber(br);
 
-				Join(myNumberInt);
+				Join(myNumberInt, skin);
+
+				getOptions(br);
 
 				drow.Login();
 				score = 0;
-				SendMessage("Join " + myNumberInt);
+				SendMessage("Join " + myNumberInt + " " + skin);
 
 				while (true) {
 					String inputLine = br.readLine();// データを一行分だけ読み込んでみる
@@ -128,7 +128,7 @@ public class MyClient {
 							if (Integer.parseInt(inputTokens[1]) == myNumberInt) {
 								break;
 							}
-							Join(Integer.parseInt(inputTokens[1]));
+							Join(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						case "Disconnect":
 							Disconnect(Integer.parseInt(inputTokens[1]));
@@ -136,6 +136,9 @@ public class MyClient {
 						case "Pop":
 							Pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]));
+							break;
+						case "Skin":
+							setSkin(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						default:
 							break;
@@ -178,17 +181,44 @@ public class MyClient {
 		return 0;
 	}
 
+	private void setSkin(int userID, int skinID) {
+		if (userID != myNumberInt) {
+			Join(userID, skinID);
+		}
+	}
+
+	private void getOptions(BufferedReader br) {
+		String serverFieldSize;
+		try {
+			serverFieldSize = br.readLine();
+			String[] inputTokens = serverFieldSize.split(" ");
+			if (inputTokens[0].equals("field")) {
+				fieldSize = Integer.parseInt(inputTokens[1]);
+				System.out.println("fieldSize=" + fieldSize);
+				drow.changeFieldSize(fieldSize);
+			} else {
+				getOptions(br);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	// userID planariaID posX posY size
 	public void Update(int userID, int planariaID, int posX, int posY, int size) {
 		if (userID != myNumberInt) {
 
 			PlayerData player = GetPlayer(userID);
 
+			if (player == null) {
+				return;
+			}
+
 			if (player.planariaData.containsKey(planariaID)) {
 				((Planaria) player.planariaData.get(planariaID)).setCurrent(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
-				drow.Create(player.skin, posX, posY, size, userID, planariaID);
+				drow.Create(player.getSkin(), posX, posY, size, userID, planariaID);
 			}
 		}
 	}
@@ -210,7 +240,7 @@ public class MyClient {
 		if (playerData.containsKey(userID)) {
 			return playerData.get(userID);
 		} else {
-			return Join(userID);
+			return null;
 		}
 	}
 
@@ -221,8 +251,9 @@ public class MyClient {
 	}
 
 	// userID posX posY
-	public PlayerData Join(int ID) {
-		PlayerData p = new PlayerData(ID);
+	public PlayerData Join(int ID, int skin) {
+
+		PlayerData p = new PlayerData(ID, skin);
 		playerData.put(ID, p);
 
 		return p;

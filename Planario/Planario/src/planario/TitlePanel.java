@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -22,6 +23,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	private MyClient mc;
 	private JLabel menu;
 	private JLabel errorText;
+	private JLayeredPane skinPanel;
 
 	public TitlePanel(MyClient mc, int width, int height) {
 		this.mc = mc;
@@ -107,7 +109,40 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 		menu.add(bgm);
 
+		BufferedImage openSkin = LoadManager.getBuffImg("res/skin.png");
+		BufferedImage closeSkin = LoadManager.getBuffImg("res/skinX.png");
+		ResizableButton skin = new ResizableButton(openSkin);
+		skin.setBounds(0, 0, 75, 75);
+		skin.setBorderPainted(false);
+		skin.setOpaque(false);
+
+		skinPanel = SKINS.getPane();
+
+		skin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (skinPane) {
+					remove(skinPanel);
+					repaint();
+					skin.setImage(openSkin);
+					skinPane = false;
+				} else {
+
+					add(skinPanel, JLayeredPane.PALETTE_LAYER);
+					skinPanel.setLocation((getSize().width - skinPanel.getSize().width) / 2,
+							(getSize().height - skinPanel.getSize().height) / 2);
+					skin.setImage(closeSkin);
+					skinPane = true;
+				}
+			}
+		});
+
+		menu.add(skin);
+
 	}
+
+	private boolean skinPane = false;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

@@ -24,7 +24,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private int shrinkCount = 0;
 
 	private MediaTracker tracker;
-	public BufferedImage[] skins;
 	private BufferedImage planktonSkin;
 	private BufferedImage virusSkin;
 
@@ -141,7 +140,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	public void Login() {
 		Point spawnPoint = mc.searchSpawnPoint();
 
-		Create(mc.GetPlayer(mc.myNumberInt).skin, spawnPoint.x, spawnPoint.y, mc.defualtSize);
+		Create(mc.GetPlayer(mc.myNumberInt).getSkin(), spawnPoint.x, spawnPoint.y, mc.defualtSize);
 		DrowThread dt = new DrowThread();
 		dt.start();
 	}
@@ -181,12 +180,17 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		init = true;
 	}
 
+	public void changeFieldSize(int fieldSize) {
+		field.setSize(fieldSize, fieldSize);
+		repaint();
+	}
+
 	private void ImportSkins() {
 		planktonSkin = LoadManager.getBuffImg("res/plankton.png");
 		tracker.addImage(planktonSkin, 0);
 		virusSkin = LoadManager.getBuffImg("res/virus.png");
 		tracker.addImage(virusSkin, 1);
-		skins = new BufferedImage[] { LoadManager.getBuffImg("res/planaria.png", tracker) };
+		SKINS.init();
 
 		try {
 			tracker.waitForAll();
@@ -221,7 +225,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	}
 
 	public Planaria Create(int skin, int x, int y, int size, int playerID, int planariaID) {
-		Planaria planaria = new Planaria(skins[skin], skin, x, y, size, planariaID);
+		Planaria planaria = new Planaria(SKINS.getSkin(skin).getBuffimg(), skin, x, y, size, planariaID);
 
 		mc.GetPlayer(playerID).planariaData.put(planaria.getID(), planaria);
 		field.add(planaria);
