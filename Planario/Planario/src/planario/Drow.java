@@ -81,13 +81,20 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		int count = 0;
 		shrinkCount++;
 
-		for (EatableObj c : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
+		PlayerData player = mc.GetPlayer(mc.myNumberInt);
+
+		if (player == null) {
+			return;
+		}
+
+		for (EatableObj c : player.planariaData.values()) {
 
 			Planaria p = (Planaria) c;
 			normalize(mouse.x - prevCenter.x - p.current.x, mouse.y - prevCenter.y - p.current.y);
 
 			p.setData(p.nextX + (int) (Vector2[0] * p.getSpeed()), p.nextY + (int) (Vector2[1] * p.getSpeed()), -1);
-			posUpdate(p);
+			posUpdate(p, 0.25f);
+
 			centerPoint.x += p.current.x;
 			centerPoint.y += p.current.y;
 
@@ -128,6 +135,9 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			}
 
 			for (EatableObj p : player.planariaData.values()) {
+				if (player.getID() != mc.myNumberInt) {
+					posUpdate((Planaria) p, 0.8f);
+				}
 				Update((Planaria) p);
 			}
 		}
@@ -173,9 +183,6 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		field = new FieldPane(MyClient.fieldSize);
 		contentPane.add(field);
 		contentPane.setLayer(field, JLayeredPane.DEFAULT_LAYER);
-
-		gameOver = new GameOverPanel(dr.width, dr.height, this);
-
 		repaint();
 		init = true;
 	}
@@ -212,12 +219,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		planaria.setBounds(planaria.current.x, planaria.current.y, size, size);
 	}
 
-	private void posUpdate(Planaria planaria) {
+	private void posUpdate(Planaria planaria, float t) {
 		planaria.nextX = (planaria.nextX > MyClient.fieldSize) ? MyClient.fieldSize : planaria.nextX;
 		planaria.nextY = (planaria.nextY > MyClient.fieldSize) ? MyClient.fieldSize : planaria.nextY;
 
-		planaria.current.x = Lerp(planaria.current.x, planaria.nextX, 0.25f);
-		planaria.current.y = Lerp(planaria.current.y, planaria.nextY, 0.25f);
+		planaria.current.x = Lerp(planaria.current.x, planaria.nextX, t);
+		planaria.current.y = Lerp(planaria.current.y, planaria.nextY, t);
 	}
 
 	public Planaria Create(int skin, int x, int y, int size) {
@@ -342,6 +349,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		try {
 			requestFocus();
 			contentPane.remove(title);
+			title = null;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
@@ -366,6 +374,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		AUDIO.BGM.restart();
 		try {
 			contentPane.remove(gameOver);
+			gameOver = null;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
@@ -397,8 +406,12 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 			// contentPaneがレンダリングされ、サイズが取得できたタイミングで初期化
 			initialize();
 		} else {
-			gameOver.setSize(dr);
-			title.setNewSize(dr);
+			if (gameOver != null) {
+				gameOver.setSize(dr);
+			}
+			if (title != null) {
+				title.setNewSize(dr);
+			}
 		}
 	}
 

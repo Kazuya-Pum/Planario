@@ -215,7 +215,7 @@ public class MyClient {
 			}
 
 			if (player.planariaData.containsKey(planariaID)) {
-				((Planaria) player.planariaData.get(planariaID)).setCurrent(posX, posY, size);
+				((Planaria) player.planariaData.get(planariaID)).setData(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
 				drow.Create(player.getSkin(), posX, posY, size, userID, planariaID);
