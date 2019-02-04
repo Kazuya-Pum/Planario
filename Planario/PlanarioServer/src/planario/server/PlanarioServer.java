@@ -2,10 +2,17 @@ package planario.server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import java.io.InputStreamReader;
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -55,7 +62,7 @@ class ClientProcThread extends Thread {
 			}
 		} catch (Exception e) {
 			// ここにプログラムが到達するときは，接続が切れたとき
-			System.out.println("Disconnect from client No." + number);
+			PlanarioServer.addText("Disconnect from client No." + number);
 			PlanarioServer.removeClient(number);// 接続が切れたのでフラグを下げる
 			PlanarioServer.SendAll("Disconnect " + number);
 		}
@@ -82,6 +89,10 @@ class PlanarioServer {
 	private static int maxPlankton = 300;
 	private static int maxConnection = 20;// 最大接続数
 
+	private static Queue<String> guiTextQueue = new ArrayDeque<String>();
+	private static JLabel guiText = new JLabel();
+	private static int maxLine = 25;
+
 	public static int getFieldSize() {
 		return fieldSize;
 	}
@@ -92,6 +103,25 @@ class PlanarioServer {
 
 	public static int getMaxConnection() {
 		return maxConnection;
+	}
+
+	public static void addText(String str) {
+		System.out.println(str);
+		guiTextQueue.add(str);
+
+		if (guiTextQueue.size() > maxLine) {
+			guiTextQueue.poll();
+		}
+
+		StringBuilder buf = new StringBuilder();
+		buf.append("<html>");
+		for (String s : guiTextQueue) {
+			buf.append(s);
+			buf.append("<br>");
+		}
+		buf.append("</html>");
+
+		guiText.setText(buf.toString());
 	}
 
 	// 全員にメッセージを送る
@@ -140,26 +170,47 @@ class PlanarioServer {
 	// mainプログラム
 	public static void main(String[] args) {
 
+		boolean gui = true;
+
 		if (args.length > 0) {
-			System.out.println("options: ");
+			addText("options: ");
 			for (String arg : args) {
 				if (arg.matches("maxPlayer=[0-9]+")) {
 					int max = getCount(arg);
 					maxConnection = max;
-					System.out.println("maxPlayer=" + max);
+					addText("maxPlayer=" + max);
 
 				} else if (arg.matches("field=[0-9]+")) {
 					int field = getCount(arg);
 					fieldSize = field;
-					System.out.println("field=" + field);
+					addText("field=" + field);
 
 				} else if (arg.matches("maxPlankton=[0-9]+")) {
 					int max = getCount(arg);
 					maxPlankton = max;
-					System.out.println("maxPlankton=" + max);
+					addText("maxPlankton=" + max);
+
+				} else if (arg.matches("nogui")) {
+					gui = false;
+					addText("nogui");
 
 				}
 			}
+		}
+
+		if (gui) {
+			JFrame frame = new JFrame();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setSize(500, 500);
+			frame.setTitle("Planar.io Server");
+
+			Dimension d = frame.getContentPane().getSize();
+
+			guiText.setSize(d.width, d.height);
+			guiText.setVerticalAlignment(JLabel.TOP);
+			frame.add(guiText);
+
+			frame.setVisible(true);
 		}
 
 		myClientProcThread = new ConcurrentHashMap<Integer, ClientProcThread>();
@@ -184,12 +235,12 @@ class IncomingThread extends Thread {
 		member = 0;// 誰も接続していないのでメンバー数は０
 		try {
 			server = createSocket();
-			System.out.println("The Planar.io Server has launched!");
+			PlanarioServer.addText("The Planar.io Server has launched!");
 
 			PlanarioServer.plankton.start();
 			while (true) {
 				Socket incoming = server.accept();
-				System.out.println("Accept client No." + n);
+				PlanarioServer.addText("Accept client No." + n);
 				// 必要な入出力ストリームを作成する
 				InputStreamReader isr = new InputStreamReader(incoming.getInputStream());
 				BufferedReader in = new BufferedReader(isr);
@@ -203,7 +254,7 @@ class IncomingThread extends Thread {
 				checkCapacity(); // 定員を確認
 			}
 		} catch (Exception e) {
-			System.err.println("ソケット作成時にエラーが発生しました: " + e);
+			PlanarioServer.addText("ソケット作成時にエラーが発生しました: " + e);
 		}
 	}
 
@@ -217,7 +268,7 @@ class IncomingThread extends Thread {
 	}
 
 	synchronized public void checkCapacity() {
-		System.out.println("member: " + member + "/" + PlanarioServer.getMaxConnection());
+		PlanarioServer.addText("member: " + member + "/" + PlanarioServer.getMaxConnection());
 
 		try {
 			if (member >= PlanarioServer.getMaxConnection()) {

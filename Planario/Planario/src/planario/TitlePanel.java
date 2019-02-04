@@ -130,8 +130,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 				} else {
 
 					add(skinPanel, JLayeredPane.PALETTE_LAYER);
-					skinPanel.setLocation((getSize().width - skinPanel.getSize().width) / 2,
-							(getSize().height - skinPanel.getSize().height) / 2);
 					skin.setImage(closeSkin);
 					skinPane = true;
 				}
@@ -168,7 +166,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 	public void setNewSize(Dimension dr) {
 		setSize(dr);
-		menu.setLocation(dr.width / 2 - menu.getSize().width / 2, dr.height / 2 - menu.getSize().height / 2);
+		menu.setLocation((dr.width - menu.getSize().width) / 2, (dr.height - menu.getSize().height) / 2);
+		skinPanel.setLocation((getSize().width - skinPanel.getSize().width) / 2,
+				(getSize().height - skinPanel.getSize().height) / 2);
 	}
 
 	public void focusIpText() {
