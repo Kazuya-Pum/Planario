@@ -86,9 +86,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 		menu.add(se);
 
-		Icon bgmOn = LoadManager.getIcon("res/bgmOn.png");
-		Icon bgmOff = LoadManager.getIcon("res/bgmOff.png");
-		JButton bgm = new JButton(bgmOn);
+		BufferedImage bgmOn = LoadManager.getBuffImg("res/bgmOn.png");
+		BufferedImage bgmOff = LoadManager.getBuffImg("res/bgmOff.png");
+		ResizableButton bgm = new ResizableButton(bgmOn);
 		bgm.setBounds(400, 360, 50, 50);
 		bgm.setBorderPainted(false);
 		bgm.setOpaque(false);
@@ -100,9 +100,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 				AUDIO.toggleBGM();
 
 				if (AUDIO.getActiveBGM()) {
-					bgm.setIcon(bgmOn);
+					bgm.setImage(bgmOn);
 				} else {
-					bgm.setIcon(bgmOff);
+					bgm.setImage(bgmOff);
 				}
 			}
 		});

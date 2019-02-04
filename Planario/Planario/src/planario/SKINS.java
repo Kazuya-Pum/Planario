@@ -35,14 +35,7 @@ public enum SKINS {
 		buffimg = LoadManager.getBuffImg(path);
 		this.id = id;
 
-		btn = (new JButton() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void paintComponent(Graphics g) {
-				g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);
-			}
-		});
+		btn = new ResizableButton(buffimg);
 
 		btn.addActionListener(new ActionListener() {
 
