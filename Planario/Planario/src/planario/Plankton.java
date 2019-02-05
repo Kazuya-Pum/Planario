@@ -3,10 +3,6 @@ package planario;
 import java.awt.image.BufferedImage;
 
 public class Plankton extends EatableObj {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	private static int id;
 	private boolean virus = false;

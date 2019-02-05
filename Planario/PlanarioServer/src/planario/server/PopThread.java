@@ -41,7 +41,7 @@ public class PopThread extends Thread {
 		Plankton p = new Plankton(random.nextInt(fieldSize), random.nextInt(fieldSize), virus);
 		planktonData.put(p.getId(), p);
 
-		PlanarioServer.SendAll(p.toString());
+		PlanarioServer.sendAll(p.toString());
 	}
 
 	public static void delete(int id) {

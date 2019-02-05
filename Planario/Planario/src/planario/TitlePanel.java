@@ -13,10 +13,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 public class TitlePanel extends JLayeredPane implements ActionListener {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private IpText ipStr;
@@ -146,7 +142,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String ip = ipStr.getText().trim();
 		ipStr.setText(ip);
-		mc.Access(ip);
+		mc.access(ip);
 	}
 
 	public void setErrorMsg(String msg) {
@@ -176,10 +172,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	}
 
 	public class IpText extends JTextField {
-
-		/**
-		 *
-		 */
 		private static final long serialVersionUID = 1L;
 
 		private String placeholder;

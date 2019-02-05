@@ -10,8 +10,8 @@ public class MyClient {
 	PrintWriter out;// 出力用のライター
 
 	public ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
-	public int myNumberInt;
-	Drow drow;
+	private int myNumberInt;
+	private Drow drow;
 	final int planktonSize = 10;
 	final int planktonScore = 1;
 	final int defualtSize = 30;
@@ -29,7 +29,7 @@ public class MyClient {
 		drow.setVisible(true);
 	}
 
-	public void Access(String serverIP) {
+	public void access(String serverIP) {
 
 		// 重複してメソッドを実行させないようにフラグで管理
 		if (accessFlag) {
@@ -63,20 +63,19 @@ public class MyClient {
 				err = "サーバーに接続できません";
 			}
 
-			drow.title.setErrorMsg(err);
+			drow.setTitleError(err);
 			accessFlag = false;
 			return;
 		}
 
 		playerData.put(0, new PlayerData(0));
-		planktons = GetPlayer(0);
+		planktons = getPlayer(0);
 
 		MesgRecvThread mrt = new MesgRecvThread(socket);// 受信用のスレッドを作成する
 		mrt.start();// スレッドを動かす（Runが動く）
 
 		mst = new MesgSendThread(this);
 
-		drow.title.hideErrorMsg();
 		drow.hideTilePane();
 	}
 
@@ -99,15 +98,15 @@ public class MyClient {
 				int skin = SKINS.getSelect();
 				out.println(skin);// 接続の最初にskin番号を送る
 
-				myNumberInt = GetMyNumber(br);
+				initMyNumber(br); // 自分のIDを取得
 
-				Join(myNumberInt, skin);
+				joinGame(getMyID(), skin);
 
 				getOptions(br);
 
 				drow.Login();
 				score = 0;
-				SendMessage("Join " + myNumberInt + " " + skin);
+				sendMessage("Join " + getMyID() + " " + skin);
 
 				while (true) {
 					String inputLine = br.readLine();// データを一行分だけ読み込んでみる
@@ -117,24 +116,24 @@ public class MyClient {
 
 						switch (cmd) {
 						case "Update":
-							Update(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
+							update(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]),
 									Integer.parseInt(inputTokens[5]));
 							break;
 						case "Delete":
-							Delete(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
+							delete(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						case "Join":
-							if (Integer.parseInt(inputTokens[1]) == myNumberInt) {
+							if (Integer.parseInt(inputTokens[1]) == getMyID()) {
 								break;
 							}
-							Join(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
+							joinGame(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						case "Disconnect":
-							Disconnect(Integer.parseInt(inputTokens[1]));
+							disconnect(Integer.parseInt(inputTokens[1]));
 							break;
 						case "Pop":
-							Pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
+							pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]));
 							break;
 						case "Skin":
@@ -148,15 +147,10 @@ public class MyClient {
 					}
 
 					// 自身のプラナリアの数が0になればゲームオーバー判定
-					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
+					if (getPlayer(getMyID()).planariaData.size() == 0) {
 						drow.setGameOver();
-						SendMessage("BYE");
-						resetField();
-						loginFlag = false;
-						accessFlag = false; // アクセスメソッドを使用可能に
-
-						AUDIO.BGM.stop();
-						AUDIO.END.play();
+						sendMessage("BYE");
+						endGame();
 
 						break;
 					}
@@ -164,26 +158,32 @@ public class MyClient {
 				socket.close();
 			} catch (IOException e) {
 				System.err.println("エラーが発生しました: " + e);
+				drow.setTitlePane();
+				drow.setTitleError("サーバーとの接続が切れました");
+				endGame();
 			}
 		}
 	}
 
-	private int GetMyNumber(BufferedReader br) {
+	private void initMyNumber(BufferedReader br) {
 		String myNumberStr;
 		try {
 			myNumberStr = br.readLine();
-			return Integer.parseInt(myNumberStr);
+			this.myNumberInt = Integer.parseInt(myNumberStr);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
-			return GetMyNumber(br);
+			initMyNumber(br);
 		}
-		return 0;
+	}
+
+	public int getMyID() {
+		return this.myNumberInt;
 	}
 
 	private void setSkin(int userID, int skinID) {
-		if (userID != myNumberInt) {
-			Join(userID, skinID);
+		if (userID != getMyID()) {
+			joinGame(userID, skinID);
 		}
 	}
 
@@ -205,10 +205,10 @@ public class MyClient {
 	}
 
 	// userID planariaID posX posY size
-	public void Update(int userID, int planariaID, int posX, int posY, int size) {
-		if (userID != myNumberInt) {
+	public void update(int userID, int planariaID, int posX, int posY, int size) {
+		if (userID != getMyID()) {
 
-			PlayerData player = GetPlayer(userID);
+			PlayerData player = getPlayer(userID);
 
 			if (player == null) {
 				return;
@@ -218,40 +218,36 @@ public class MyClient {
 				((Planaria) player.planariaData.get(planariaID)).setData(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
-				drow.Create(player.getSkin(), posX, posY, size, userID, planariaID);
+				drow.create(player.getSkin(), posX, posY, size, userID, planariaID);
 			}
 		}
 	}
 
-	public void Pop(int planktonID, int posX, int posY, int virus) {
+	public void pop(int planktonID, int posX, int posY, int virus) {
 		if (!planktons.planariaData.containsKey(planktonID)) {
 			Plankton plankton;
 
 			if (virus == 1) {
-				plankton = drow.PopVirus(posX, posY, planktonID);
+				plankton = drow.popVirus(posX, posY, planktonID);
 			} else {
-				plankton = drow.PopPlankton(posX, posY, planktonID);
+				plankton = drow.popPlankton(posX, posY, planktonID);
 			}
 			planktons.planariaData.put(planktonID, plankton);
 		}
 	}
 
-	public PlayerData GetPlayer(int userID) {
-		if (playerData.containsKey(userID)) {
-			return playerData.get(userID);
-		} else {
-			return null;
-		}
+	public PlayerData getPlayer(int userID) {
+		return playerData.get(userID);
 	}
 
 	// userID planariaID
-	public void Delete(int userID, int planariaID) {
-		drow.Delete(GetPlayer(userID).planariaData.get(planariaID));
-		GetPlayer(userID).planariaData.remove(planariaID);
+	public void delete(int userID, int planariaID) {
+		drow.delete(getPlayer(userID).planariaData.get(planariaID));
+		getPlayer(userID).planariaData.remove(planariaID);
 	}
 
 	// userID posX posY
-	public PlayerData Join(int ID, int skin) {
+	public PlayerData joinGame(int ID, int skin) {
 
 		PlayerData p = new PlayerData(ID, skin);
 		playerData.put(ID, p);
@@ -259,12 +255,21 @@ public class MyClient {
 		return p;
 	}
 
-	public void Disconnect(int userID) {
-		for (EatableObj p : GetPlayer(userID).planariaData.values()) {
-			drow.Delete(p);
+	public void disconnect(int userID) {
+		for (EatableObj p : getPlayer(userID).planariaData.values()) {
+			drow.delete(p);
 			p = null;
 		}
 		playerData.remove(userID);
+	}
+
+	private void endGame() {
+		loginFlag = false;
+		resetField();
+		accessFlag = false; // アクセスメソッドを使用可能に
+
+		AUDIO.BGM.stop();
+		AUDIO.END.play();
 	}
 
 	private void resetField() {
@@ -273,7 +278,7 @@ public class MyClient {
 		drow.fieldReset();
 	}
 
-	public void SendMessage(String msg) {
+	public void sendMessage(String msg) {
 		try {
 			out.println(msg);
 			out.flush();
@@ -282,10 +287,10 @@ public class MyClient {
 		}
 	}
 
-	public void SendMyPlanariaData(Planaria p) {
+	public void sendMyPlanariaData(Planaria p) {
 		StringBuilder buf = new StringBuilder();
 		buf.append("Update ");
-		buf.append(myNumberInt);
+		buf.append(getMyID());
 		buf.append(" ");
 		buf.append(p.getID());
 		buf.append(" ");
@@ -294,10 +299,10 @@ public class MyClient {
 		buf.append(p.current.y);
 		buf.append(" ");
 		buf.append(p.size);
-		SendMessage(buf.toString());
+		sendMessage(buf.toString());
 	}
 
-	public void Search(Planaria p) {
+	public void search(Planaria p) {
 
 		for (PlayerData player : playerData.values()) {
 			for (EatableObj planaria : player.planariaData.values()) {
@@ -307,8 +312,8 @@ public class MyClient {
 
 				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3) {
 					if (planaria.size < p.size * 0.9) {
-						Eat(p, player.getID(), planaria);
-					} else if (myNumberInt == player.getID()) {
+						eat(p, player.getID(), planaria);
+					} else if (getMyID() == player.getID()) {
 						int x = p.current.x - planaria.current.x;
 						int y = p.current.y - planaria.current.y;
 
@@ -317,28 +322,30 @@ public class MyClient {
 						x = (int) (x / diff * (p.size + planaria.size) / 4);
 						y = (int) (y / diff * (p.size + planaria.size) / 4);
 
-						p.setData(planaria.current.x + x, planaria.current.y + y, -1);
+						p.setNext(planaria.current.x + x, planaria.current.y + y);
 					}
 				}
 			}
 		}
 	}
 
-	public void Eat(Planaria myPlanaria, int userID, EatableObj p) {
-		if (userID != myNumberInt) {
+	public void eat(Planaria myPlanaria, int userID, EatableObj p) {
+		int size = p.size;
+
+		if (userID != getMyID()) {
 			if (userID == 0) {
-				p.size = planktonScore;
+				size = planktonScore;
 
 				if (((Plankton) p).isVirus()) {
-					drow.VirusSpilit(myPlanaria);
+					drow.virusSpilit(myPlanaria);
 				}
 			}
-			score += p.size;
+			score += size;
 		}
 
-		myPlanaria.setData(-1, -1, myPlanaria.size + p.size);
-		Delete(userID, p.getID());
-		SendMessage("Delete " + userID + " " + p.getID());
+		myPlanaria.setEatSize(myPlanaria.size + size);
+		delete(userID, p.getID());
+		sendMessage("Delete " + userID + " " + p.getID());
 
 		if (userID == 0) {
 			AUDIO.EAT_1.play();

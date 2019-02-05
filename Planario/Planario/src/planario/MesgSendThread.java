@@ -10,14 +10,18 @@ public class MesgSendThread extends Thread {
 	public void run() {
 		try {
 			while (mc.loginFlag) {
-				for (EatableObj p : mc.GetPlayer(mc.myNumberInt).planariaData.values()) {
-					mc.SendMyPlanariaData((Planaria) p);
+
+				PlayerData player = mc.getPlayer(mc.getMyID());
+				for (EatableObj p : player.planariaData.values()) {
+					mc.sendMyPlanariaData((Planaria) p);
 				}
 
 				sleep(Drow.FPS);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+
 		}
 	}
 }

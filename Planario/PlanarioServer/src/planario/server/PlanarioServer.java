@@ -57,14 +57,14 @@ class ClientProcThread extends Thread {
 							PopThread.delete(Integer.parseInt(inputTokens[2]));
 						}
 					}
-					PlanarioServer.SendAll(str);// サーバに来たメッセージは接続しているクライアント全員に配る
+					PlanarioServer.sendAll(str);// サーバに来たメッセージは接続しているクライアント全員に配る
 				}
 			}
 		} catch (Exception e) {
 			// ここにプログラムが到達するときは，接続が切れたとき
 			PlanarioServer.addText("Disconnect from client No." + number);
 			PlanarioServer.removeClient(number);// 接続が切れたのでフラグを下げる
-			PlanarioServer.SendAll("Disconnect " + number);
+			PlanarioServer.sendAll("Disconnect " + number);
 		}
 	}
 
@@ -105,10 +105,12 @@ class PlanarioServer {
 		return maxConnection;
 	}
 
+	// Guiのテキストを更新
 	public static void addText(String str) {
 		System.out.println(str);
 		guiTextQueue.add(str);
 
+		// 溢れたらふるいテキストを捨てる
 		if (guiTextQueue.size() > maxLine) {
 			guiTextQueue.poll();
 		}
@@ -125,7 +127,7 @@ class PlanarioServer {
 	}
 
 	// 全員にメッセージを送る
-	public static void SendAll(String str) {
+	public static void sendAll(String str) {
 		// 送られた来たメッセージを接続している全員に配る
 		for (ClientProcThread c : myClientProcThread.values()) {
 			c.getOut().println(str);
@@ -172,6 +174,7 @@ class PlanarioServer {
 
 		boolean gui = true;
 
+		// 引数チェック
 		if (args.length > 0) {
 			addText("options: ");
 			for (String arg : args) {

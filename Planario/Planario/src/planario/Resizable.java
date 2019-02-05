@@ -5,10 +5,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.JLayeredPane;
 
 public class Resizable extends JLayeredPane {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	private BufferedImage buffimg;
 

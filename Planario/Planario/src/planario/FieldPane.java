@@ -3,10 +3,6 @@ package planario;
 import java.awt.Component;
 
 public class FieldPane extends Resizable {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public FieldPane(int size) {
