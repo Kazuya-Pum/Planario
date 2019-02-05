@@ -63,9 +63,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText.setForeground(new Color(255, 0, 0));
 		errorText.setHorizontalAlignment(JLabel.CENTER);
 
-		Icon seOn = LoadManager.getIcon("res/seOn.png");
-		Icon seOff = LoadManager.getIcon("res/seOff.png");
-		JButton se = new JButton(seOn);
+		BufferedImage seOn = LoadManager.getBuffImg("res/seOn.png");
+		BufferedImage seOff = LoadManager.getBuffImg("res/seOff.png");
+		ResizableButton se = new ResizableButton((AUDIO.getActiveSE()) ? seOn : seOff);
 		se.setBounds(400, 310, 50, 50);
 		se.setBorderPainted(false);
 		se.setOpaque(false);
@@ -77,9 +77,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 				AUDIO.toggleSE();
 
 				if (AUDIO.getActiveSE()) {
-					se.setIcon(seOn);
+					se.setImage(seOn);
 				} else {
-					se.setIcon(seOff);
+					se.setImage(seOff);
 				}
 			}
 		});
@@ -88,7 +88,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 		BufferedImage bgmOn = LoadManager.getBuffImg("res/bgmOn.png");
 		BufferedImage bgmOff = LoadManager.getBuffImg("res/bgmOff.png");
-		ResizableButton bgm = new ResizableButton(bgmOn);
+		ResizableButton bgm = new ResizableButton((AUDIO.getActiveBGM()) ? bgmOn : bgmOff);
 		bgm.setBounds(400, 360, 50, 50);
 		bgm.setBorderPainted(false);
 		bgm.setOpaque(false);
