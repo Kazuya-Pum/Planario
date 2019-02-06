@@ -17,16 +17,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-//ã‚¹ãƒ¬ãƒƒãƒ‰éƒ¨ï¼ˆå„ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã«å¿œã˜ã¦ï¼‰
+//ƒXƒŒƒbƒh•”iŠeƒNƒ‰ƒCƒAƒ“ƒg‚É‰‚¶‚Äj
 class ClientProcThread extends Thread {
-	private int number;// è‡ªåˆ†ã®ç•ªå·
+	private int number;// ©•ª‚Ì”Ô†
 	@SuppressWarnings("unused")
 	private Socket incoming;
 	@SuppressWarnings("unused")
 	private InputStreamReader myIsr;
 	private BufferedReader myIn;
 	private PrintWriter myOut;
-	private String mySkin = "0";// æ¥ç¶šè€…ã®skinç•ªå·
+	private String mySkin = "0";// Ú‘±Ò‚Ìskin”Ô†
 
 	public ClientProcThread(int n, Socket i, InputStreamReader isr, BufferedReader in, PrintWriter out) {
 		number = n;
@@ -38,15 +38,15 @@ class ClientProcThread extends Thread {
 
 	public void run() {
 		try {
-			myOut.println(number);// åˆå›ã ã‘å‘¼ã°ã‚Œã‚‹
+			myOut.println(number);// ‰‰ñ‚¾‚¯ŒÄ‚Î‚ê‚é
 			myOut.println("field " + PlanarioServer.getFieldSize());
 			PlanarioServer.sendAllPlankton(myOut);
-			mySkin = myIn.readLine();// åˆã‚ã¦æ¥ç¶šã—ãŸã¨ãã®ä¸€è¡Œç›®ã¯åå‰
+			mySkin = myIn.readLine();// ‰‚ß‚ÄÚ‘±‚µ‚½‚Æ‚«‚Ìˆês–Ú‚Í–¼‘O
 			PlanarioServer.sendAllPlayerSkin(myOut);
 
-			while (true) {// ç„¡é™ãƒ«ãƒ¼ãƒ—ã§ï¼Œã‚½ã‚±ãƒƒãƒˆã¸ã®å…¥åŠ›ã‚’ç›£è¦–ã™ã‚‹
+			while (true) {// –³ŒÀƒ‹[ƒv‚ÅCƒ\ƒPƒbƒg‚Ö‚Ì“ü—Í‚ğŠÄ‹‚·‚é
 				String str = myIn.readLine();
-				if (str != null) {// ã“ã®ã‚½ã‚±ãƒƒãƒˆï¼ˆãƒãƒƒãƒ•ã‚¡ï¼‰ã«å…¥åŠ›ãŒã‚ã‚‹ã‹ã‚’ãƒã‚§ãƒƒã‚¯
+				if (str != null) {// ‚±‚Ìƒ\ƒPƒbƒgiƒoƒbƒtƒ@j‚É“ü—Í‚ª‚ ‚é‚©‚ğƒ`ƒFƒbƒN
 					if (str.toUpperCase().equals("BYE")) {
 						myOut.println("Good bye!");
 						throw new Exception();
@@ -57,13 +57,13 @@ class ClientProcThread extends Thread {
 							PopThread.delete(Integer.parseInt(inputTokens[2]));
 						}
 					}
-					PlanarioServer.sendAll(str);// ã‚µãƒ¼ãƒã«æ¥ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã¯æ¥ç¶šã—ã¦ã„ã‚‹ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆå…¨å“¡ã«é…ã‚‹
+					PlanarioServer.sendAll(str);// ƒT[ƒo‚É—ˆ‚½ƒƒbƒZ[ƒW‚ÍÚ‘±‚µ‚Ä‚¢‚éƒNƒ‰ƒCƒAƒ“ƒg‘Sˆõ‚É”z‚é
 				}
 			}
 		} catch (Exception e) {
-			// ã“ã“ã«ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãŒåˆ°é”ã™ã‚‹ã¨ãã¯ï¼Œæ¥ç¶šãŒåˆ‡ã‚ŒãŸã¨ã
+			// ‚±‚±‚ÉƒvƒƒOƒ‰ƒ€‚ª“’B‚·‚é‚Æ‚«‚ÍCÚ‘±‚ªØ‚ê‚½‚Æ‚«
 			PlanarioServer.addText("Disconnect from client No." + number);
-			PlanarioServer.removeClient(number);// æ¥ç¶šãŒåˆ‡ã‚ŒãŸã®ã§ãƒ•ãƒ©ã‚°ã‚’ä¸‹ã’ã‚‹
+			PlanarioServer.removeClient(number);// Ú‘±‚ªØ‚ê‚½‚Ì‚Åƒtƒ‰ƒO‚ğ‰º‚°‚é
 			PlanarioServer.sendAll("Disconnect " + number);
 		}
 	}
@@ -84,10 +84,10 @@ class ClientProcThread extends Thread {
 class PlanarioServer {
 	public static ConcurrentHashMap<Integer, ClientProcThread> myClientProcThread;
 	private static IncomingThread incomingThread;
-	public static PopThread plankton; // ãƒ—ãƒ©ãƒ³ã‚¯ãƒˆãƒ³ã‚’ç”Ÿæˆã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰
-	private static int fieldSize = 4000;
+	public static PopThread plankton; // ƒvƒ‰ƒ“ƒNƒgƒ“‚ğ¶¬‚·‚éƒXƒŒƒbƒh
+	private static int fieldSize = 4000;	// ƒtƒB[ƒ‹ƒh‚ÌL‚³
 	private static int maxPlankton = 300;
-	private static int maxConnection = 20;// æœ€å¤§æ¥ç¶šæ•°
+	private static int maxConnection = 20;// Å‘åÚ‘±”
 
 	private static Queue<String> guiTextQueue = new ArrayDeque<String>();
 	private static JLabel guiText = new JLabel();
@@ -105,12 +105,12 @@ class PlanarioServer {
 		return maxConnection;
 	}
 
-	// Guiã®ãƒ†ã‚­ã‚¹ãƒˆã‚’æ›´æ–°
+	// Gui‚ÌƒeƒLƒXƒg‚ğXV
 	public static void addText(String str) {
 		System.out.println(str);
 		guiTextQueue.add(str);
 
-		// æº¢ã‚ŒãŸã‚‰ãµã‚‹ã„ãƒ†ã‚­ã‚¹ãƒˆã‚’æ¨ã¦ã‚‹
+		// ˆì‚ê‚½‚ç‚Ó‚é‚¢ƒeƒLƒXƒg‚ğÌ‚Ä‚é
 		if (guiTextQueue.size() > maxLine) {
 			guiTextQueue.poll();
 		}
@@ -126,16 +126,16 @@ class PlanarioServer {
 		guiText.setText(buf.toString());
 	}
 
-	// å…¨å“¡ã«ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ã‚‹
+	// ‘Sˆõ‚ÉƒƒbƒZ[ƒW‚ğ‘—‚é
 	public static void sendAll(String str) {
-		// é€ã‚‰ã‚ŒãŸæ¥ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’æ¥ç¶šã—ã¦ã„ã‚‹å…¨å“¡ã«é…ã‚‹
+		// ‘—‚ç‚ê‚½—ˆ‚½ƒƒbƒZ[ƒW‚ğÚ‘±‚µ‚Ä‚¢‚é‘Sˆõ‚É”z‚é
 		for (ClientProcThread c : myClientProcThread.values()) {
 			c.getOut().println(str);
-			c.getOut().flush();// ãƒãƒƒãƒ•ã‚¡ã‚’ã¯ãå‡ºã™ï¼ï¼ãƒãƒƒãƒ•ã‚¡ã«ã‚ã‚‹å…¨ã¦ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã™ãã«é€ä¿¡ã™ã‚‹
+			c.getOut().flush();// ƒoƒbƒtƒ@‚ğ‚Í‚«o‚·„ƒoƒbƒtƒ@‚É‚ ‚é‘S‚Ä‚Ìƒf[ƒ^‚ğ‚·‚®‚É‘—M‚·‚é
 		}
 	}
 
-	// ãƒ—ãƒ©ãƒ³ã‚¯ãƒˆãƒ³ã®ãƒ‡ãƒ¼ã‚¿ã‚’æŒ‡å®šã®ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã«é€ä¿¡ã™ã‚‹
+	// ƒvƒ‰ƒ“ƒNƒgƒ“‚Ìƒf[ƒ^‚ğw’è‚ÌƒNƒ‰ƒCƒAƒ“ƒg‚É‘—M‚·‚é
 	public static void sendAllPlankton(PrintWriter myOut) {
 		for (Plankton p : PopThread.getData()) {
 			myOut.println(p.toString());
@@ -150,7 +150,7 @@ class PlanarioServer {
 		}
 	}
 
-	// ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®æƒ…å ±ã‚’å‰Šé™¤ã™ã‚‹
+	// ƒNƒ‰ƒCƒAƒ“ƒg‚Ìî•ñ‚ğíœ‚·‚é
 	public static void removeClient(int n) {
 		myClientProcThread.remove(n);
 		IncomingThread.updateMemberCount();
@@ -158,7 +158,7 @@ class PlanarioServer {
 		incomingThread.checkCapacity();
 	}
 
-	// å¼•æ•°ã‹ã‚‰æ•°å­—ã‚’è¿”ã™
+	// ˆø”‚©‚ç”š‚ğ•Ô‚·
 	private static int getCount(String arg) {
 		Pattern p = Pattern.compile("[0-9]+");
 		Matcher m = p.matcher(arg);
@@ -169,13 +169,13 @@ class PlanarioServer {
 		return 0;
 	}
 
-	// mainãƒ—ãƒ­ã‚°ãƒ©ãƒ 
+	// mainƒvƒƒOƒ‰ƒ€
 	public static void main(String[] args) {
 
 		boolean gui = true;
 		int port = 10000;
 
-		// å¼•æ•°ãƒã‚§ãƒƒã‚¯
+		// ˆø”ƒ`ƒFƒbƒN
 		if (args.length > 0) {
 			addText("options: ");
 			for (String arg : args) {
@@ -225,13 +225,13 @@ class PlanarioServer {
 		myClientProcThread = new ConcurrentHashMap<Integer, ClientProcThread>();
 
 		plankton = new PopThread();
-		incomingThread = new IncomingThread(port); // å®šå“¡æ™‚ã«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å¾…æ©Ÿã•ã›ã‚‹ãŸã‚ã«åˆ¥ã‚¹ãƒ¬ãƒƒãƒ‰
+		incomingThread = new IncomingThread(port); // ’èˆõ‚ÉƒXƒŒƒbƒh‚ğ‘Ò‹@‚³‚¹‚é‚½‚ß‚É•ÊƒXƒŒƒbƒh
 		incomingThread.start();
 	}
 }
 
 class IncomingThread extends Thread {
-	private static int member;// æ¥ç¶šã—ã¦ã„ã‚‹ãƒ¡ãƒ³ãƒãƒ¼ã®æ•°
+	private static int member;// Ú‘±‚µ‚Ä‚¢‚éƒƒ“ƒo[‚Ì”
 
 	private ServerSocket server;
 	private final int port;
@@ -242,7 +242,7 @@ class IncomingThread extends Thread {
 
 	public void run() {
 		int n = 1;
-		member = 0;// èª°ã‚‚æ¥ç¶šã—ã¦ã„ãªã„ã®ã§ãƒ¡ãƒ³ãƒãƒ¼æ•°ã¯ï¼
+		member = 0;// ’N‚àÚ‘±‚µ‚Ä‚¢‚È‚¢‚Ì‚Åƒƒ“ƒo[”‚Í‚O
 		try {
 			server = createSocket();
 			PlanarioServer.addText("The Planar.io Server has launched!");
@@ -251,29 +251,30 @@ class IncomingThread extends Thread {
 			while (true) {
 				Socket incoming = server.accept();
 				PlanarioServer.addText("Accept client No." + n);
-				// å¿…è¦ãªå…¥å‡ºåŠ›ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’ä½œæˆã™ã‚‹
+				// •K—v‚È“üo—ÍƒXƒgƒŠ[ƒ€‚ğì¬‚·‚é
 				InputStreamReader isr = new InputStreamReader(incoming.getInputStream());
 				BufferedReader in = new BufferedReader(isr);
 				PrintWriter out = new PrintWriter(incoming.getOutputStream(), true);
 
-				PlanarioServer.myClientProcThread.put(n, new ClientProcThread(n, incoming, isr, in, out));// å¿…è¦ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æ¸¡ã—ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ä½œæˆ
-				PlanarioServer.myClientProcThread.get(n).start();// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’é–‹å§‹ã™ã‚‹
-				updateMemberCount(); // ãƒ¡ãƒ³ãƒãƒ¼ã®æ•°ã‚’æ›´æ–°ã™ã‚‹
+				PlanarioServer.myClientProcThread.put(n, new ClientProcThread(n, incoming, isr, in, out));// •K—v‚Èƒpƒ‰ƒ[ƒ^‚ğ“n‚µƒXƒŒƒbƒh‚ğì¬
+				PlanarioServer.myClientProcThread.get(n).start();// ƒXƒŒƒbƒh‚ğŠJn‚·‚é
+				updateMemberCount(); // ƒƒ“ƒo[‚Ì”‚ğXV‚·‚é
 				n++;
 
-				checkCapacity(); // å®šå“¡ã‚’ç¢ºèª
+				checkCapacity(); // ’èˆõ‚ğŠm”F
 			}
 		} catch (Exception e) {
-			PlanarioServer.addText("ã‚½ã‚±ãƒƒãƒˆä½œæˆæ™‚ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
+			PlanarioServer.addText("ƒ\ƒPƒbƒgì¬‚ÉƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
 		}
 	}
 
+	// ƒƒ“ƒo[”‚ğXV
 	public static void updateMemberCount() {
 		member = PlanarioServer.myClientProcThread.size();
 	}
 
 	private ServerSocket createSocket() throws IOException {
-		// 10000ç•ªãƒãƒ¼ãƒˆã‚’åˆ©ç”¨ã™ã‚‹
+		// 10000”Ôƒ|[ƒg‚ğ—˜—p‚·‚é
 		return new ServerSocket(port);
 	}
 
@@ -282,11 +283,11 @@ class IncomingThread extends Thread {
 
 		try {
 			if (member >= PlanarioServer.getMaxConnection()) {
-				server.close(); // ã‚½ã‚±ãƒƒãƒˆã‚’é–‰ã˜ã‚‹
-				wait(); // ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å¾…æ©Ÿ
+				server.close(); // ƒ\ƒPƒbƒg‚ğ•Â‚¶‚é
+				wait(); // ƒXƒŒƒbƒh‚ğ‘Ò‹@
 			} else if (server.isClosed()) {
-				server = createSocket(); // ã‚½ã‚±ãƒƒãƒˆã‚’ä½œæˆ
-				notify(); // ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å†é–‹
+				server = createSocket(); // ƒ\ƒPƒbƒg‚ğì¬
+				notify(); // ƒXƒŒƒbƒh‚ğÄŠJ
 			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

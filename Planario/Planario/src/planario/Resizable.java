@@ -12,13 +12,13 @@ public class Resizable extends JLayeredPane {
 		this.buffimg = buffimg;
 	}
 
-	// ãƒ‘ã‚¹ã§æŒ‡å®š
+	// ƒpƒX‚Åw’è
 	public Resizable(String path) {
 		this.buffimg = LoadManager.getBuffImg(path);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
-		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);	// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å¤§ãã•ã«åˆã‚ã›ã¦buffimgãŒæç”»ã•ã‚Œã‚‹
+		g.drawImage(buffimg, 0, 0, getSize().width, getSize().height, this);	// ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘å‚«‚³‚É‡‚í‚¹‚Äbuffimg‚ª•`‰æ‚³‚ê‚é
 	}
 }

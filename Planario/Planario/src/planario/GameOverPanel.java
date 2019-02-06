@@ -36,7 +36,6 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-
 	}
 
 	@Override
@@ -46,7 +45,6 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-
 	}
 
 	@Override
@@ -56,22 +54,17 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-
 	}
-
 }

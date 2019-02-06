@@ -20,6 +20,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 	private JLabel menu;
 	private JLabel errorText;
 	private JLayeredPane skinPanel;
+	private boolean skinPane = false;
 
 	public TitlePanel(MyClient mc, int width, int height) {
 		this.mc = mc;
@@ -133,10 +134,7 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		});
 
 		menu.add(skin);
-
 	}
-
-	private boolean skinPane = false;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -176,9 +174,6 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 		private String placeholder;
 
-		public IpText() {
-		}
-
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
@@ -196,7 +191,5 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		public void setPlaceholder(String s) {
 			placeholder = s;
 		}
-
 	}
-
 }

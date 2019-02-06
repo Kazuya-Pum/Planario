@@ -7,7 +7,7 @@ import java.awt.Point;
 import java.io.*;
 
 public class MyClient {
-	PrintWriter out;// å‡ºåŠ›ç”¨ã®ãƒ©ã‚¤ã‚¿ãƒ¼
+	PrintWriter out;// o—Í—p‚Ìƒ‰ƒCƒ^[
 
 	public ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
 	private int myNumberInt;
@@ -31,7 +31,7 @@ public class MyClient {
 
 	public void access(String serverIP) {
 
-		// é‡è¤‡ã—ã¦ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å®Ÿè¡Œã•ã›ãªã„ã‚ˆã†ã«ãƒ•ãƒ©ã‚°ã§ç®¡ç†
+		// d•¡‚µ‚Äƒƒ\ƒbƒh‚ğÀs‚³‚¹‚È‚¢‚æ‚¤‚Éƒtƒ‰ƒO‚ÅŠÇ—
 		if (accessFlag) {
 			return;
 		} else {
@@ -51,25 +51,25 @@ public class MyClient {
 			port = Integer.parseInt(ips[1]);
 		}
 
-		// ã‚µãƒ¼ãƒã«æ¥ç¶šã™ã‚‹
+		// ƒT[ƒo‚ÉÚ‘±‚·‚é
 		Socket socket = null;
 		try {
 			InetSocketAddress endpoint = new InetSocketAddress(serverIP, port);
 			socket = new Socket();
-			socket.connect(endpoint, 4000); // 4000msã§timeout
+			socket.connect(endpoint, 4000); // 4000ms‚Åtimeout
 		} catch (Exception e) {
-			System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
+			System.err.println("ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
 
 			String err;
 			switch (e.getClass().getSimpleName()) {
 			case "SocketTimeoutException":
-				err = "ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ã¾ã—ãŸ";
+				err = "ƒ^ƒCƒ€ƒAƒEƒg‚µ‚Ü‚µ‚½";
 				break;
 			case "UnknownHostException":
-				err = "ãƒ›ã‚¹ãƒˆã‚’ç‰¹å®šã§ãã¾ã›ã‚“";
+				err = "ƒzƒXƒg‚ğ“Á’è‚Å‚«‚Ü‚¹‚ñ";
 				break;
 			default:
-				err = "ã‚µãƒ¼ãƒãƒ¼ã«æ¥ç¶šã§ãã¾ã›ã‚“";
+				err = "ƒT[ƒo[‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñ";
 			}
 
 			drow.setTitleError(err);
@@ -80,15 +80,15 @@ public class MyClient {
 		playerData.put(0, new PlayerData(0));
 		planktons = getPlayer(0);
 
-		MesgRecvThread mrt = new MesgRecvThread(socket);// å—ä¿¡ç”¨ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ä½œæˆã™ã‚‹
-		mrt.start();// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‹•ã‹ã™ï¼ˆRunãŒå‹•ãï¼‰
+		MesgRecvThread mrt = new MesgRecvThread(socket);// óM—p‚ÌƒXƒŒƒbƒh‚ğì¬‚·‚é
+		mrt.start();// ƒXƒŒƒbƒh‚ğ“®‚©‚·iRun‚ª“®‚­j
 
 		mst = new MesgSendThread(this);
 
 		drow.hideTilePane();
 	}
 
-	// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡ã®ãŸã‚ã®ã‚¹ãƒ¬ãƒƒãƒ‰
+	// ƒƒbƒZ[ƒWóM‚Ì‚½‚ß‚ÌƒXƒŒƒbƒh
 	public class MesgRecvThread extends Thread {
 
 		Socket socket;
@@ -97,7 +97,7 @@ public class MyClient {
 			socket = s;
 		}
 
-		// é€šä¿¡çŠ¶æ³ã‚’ç›£è¦–ã—ï¼Œå—ä¿¡ãƒ‡ãƒ¼ã‚¿ã«ã‚ˆã£ã¦å‹•ä½œã™ã‚‹
+		// ’ÊMó‹µ‚ğŠÄ‹‚µCóMƒf[ƒ^‚É‚æ‚Á‚Ä“®ì‚·‚é
 		public void run() {
 			try {
 				InputStreamReader sisr = new InputStreamReader(socket.getInputStream());
@@ -105,9 +105,9 @@ public class MyClient {
 				out = new PrintWriter(socket.getOutputStream(), true);
 
 				int skin = SKINS.getSelect();
-				out.println(skin);// æ¥ç¶šã®æœ€åˆã«skinç•ªå·ã‚’é€ã‚‹
+				out.println(skin);// Ú‘±‚ÌÅ‰‚Éskin”Ô†‚ğ‘—‚é
 
-				initMyNumber(br); // è‡ªåˆ†ã®IDã‚’å–å¾—
+				initMyNumber(br); // ©•ª‚ÌID‚ğæ“¾
 
 				joinGame(getMyID(), skin);
 
@@ -118,10 +118,10 @@ public class MyClient {
 				sendMessage("Join " + getMyID() + " " + skin);
 
 				while (true) {
-					String inputLine = br.readLine();// ãƒ‡ãƒ¼ã‚¿ã‚’ä¸€è¡Œåˆ†ã ã‘èª­ã¿è¾¼ã‚“ã§ã¿ã‚‹
-					if (inputLine != null) {// èª­ã¿è¾¼ã‚“ã ã¨ãã«ãƒ‡ãƒ¼ã‚¿ãŒèª­ã¿è¾¼ã¾ã‚ŒãŸã‹ã©ã†ã‹ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
-						String[] inputTokens = inputLine.split(" "); // å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ã‚’è§£æã™ã‚‹ãŸã‚ã«ã€ã‚¹ãƒšãƒ¼ã‚¹ã§åˆ‡ã‚Šåˆ†ã‘ã‚‹
-						String cmd = inputTokens[0];// ã‚³ãƒãƒ³ãƒ‰ã®å–ã‚Šå‡ºã—ï¼ï¼‘ã¤ç›®ã®è¦ç´ ã‚’å–ã‚Šå‡ºã™
+					String inputLine = br.readLine();// ƒf[ƒ^‚ğˆês•ª‚¾‚¯“Ç‚İ‚ñ‚Å‚İ‚é
+					if (inputLine != null) {// “Ç‚İ‚ñ‚¾‚Æ‚«‚Éƒf[ƒ^‚ª“Ç‚İ‚Ü‚ê‚½‚©‚Ç‚¤‚©‚ğƒ`ƒFƒbƒN‚·‚é
+						String[] inputTokens = inputLine.split(" "); // “ü—Íƒf[ƒ^‚ğ‰ğÍ‚·‚é‚½‚ß‚ÉAƒXƒy[ƒX‚ÅØ‚è•ª‚¯‚é
+						String cmd = inputTokens[0];// ƒRƒ}ƒ“ƒh‚Ìæ‚èo‚µD‚P‚Â–Ú‚Ì—v‘f‚ğæ‚èo‚·
 
 						switch (cmd) {
 						case "Update":
@@ -155,7 +155,7 @@ public class MyClient {
 						break;
 					}
 
-					// è‡ªèº«ã®ãƒ—ãƒ©ãƒŠãƒªã‚¢ã®æ•°ãŒ0ã«ãªã‚Œã°ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼åˆ¤å®š
+					// ©g‚Ìƒvƒ‰ƒiƒŠƒA‚Ì”‚ª0‚É‚È‚ê‚ÎƒQ[ƒ€ƒI[ƒo[”»’è
 					if (getPlayer(getMyID()).planariaData.size() == 0) {
 						drow.setGameOver();
 						sendMessage("BYE");
@@ -166,9 +166,9 @@ public class MyClient {
 				}
 				socket.close();
 			} catch (IOException e) {
-				System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
+				System.err.println("ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
 				drow.setTitlePane();
-				drow.setTitleError("ã‚µãƒ¼ãƒãƒ¼ã¨ã®æ¥ç¶šãŒåˆ‡ã‚Œã¾ã—ãŸ");
+				drow.setTitleError("ƒT[ƒo[‚Æ‚ÌÚ‘±‚ªØ‚ê‚Ü‚µ‚½");
 				endGame();
 			}
 		}
@@ -275,7 +275,7 @@ public class MyClient {
 	private void endGame() {
 		loginFlag = false;
 		resetField();
-		accessFlag = false; // ã‚¢ã‚¯ã‚»ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ç”¨å¯èƒ½ã«
+		accessFlag = false; // ƒAƒNƒZƒXƒƒ\ƒbƒh‚ğg—p‰Â”\‚É
 
 		AUDIO.BGM.stop();
 		AUDIO.END.play();

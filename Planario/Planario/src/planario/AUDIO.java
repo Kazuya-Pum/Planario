@@ -18,25 +18,25 @@ public enum AUDIO {
 	private static boolean activeBGM = true;
 
 	private AUDIO(String path) {
-		// Clipæº–å‚™
-		try (AudioInputStream ais = AudioSystem.getAudioInputStream(LoadManager.getUrl(path))) {	// ãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
+		// Clip€”õ
+		try (AudioInputStream ais = AudioSystem.getAudioInputStream(LoadManager.getUrl(path))) {	// ƒtƒ@ƒCƒ‹“Ç‚İ‚İ
 			AudioFormat af = ais.getFormat();
 			DataLine.Info dataLine = new DataLine.Info(Clip.class, af);
 			clip = (Clip) AudioSystem.getLine(dataLine);
 
-			clip.open(ais);	// Clipæº–å‚™å®Œäº†
+			clip.open(ais);	// Clip€”õŠ®—¹
 		} catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	// SEã®ãƒŸãƒ¥ãƒ¼ãƒˆåˆ‡ã‚Šæ›¿ãˆ
+	// SE‚Ìƒ~ƒ…[ƒgØ‚è‘Ö‚¦
 	public static boolean toggleSE() {
 		activeSE = (activeSE) ? false : true;
 		return activeSE;
 	}
 
-	// BGMã®ãƒŸãƒ¥ãƒ¼ãƒˆåˆ‡ã‚Šæ›¿ãˆ
+	// BGM‚Ìƒ~ƒ…[ƒgØ‚è‘Ö‚¦
 	public static boolean toggleBGM() {
 		activeBGM = (activeBGM) ? false : true;
 
@@ -57,7 +57,7 @@ public enum AUDIO {
 		return activeBGM;
 	}
 
-	// 1å›å†ç”Ÿ
+	// 1‰ñÄ¶
 	public void play() {
 		if (!activeSE) {
 			return;
@@ -70,7 +70,7 @@ public enum AUDIO {
 		clip.start();
 	}
 
-	// ãƒ«ãƒ¼ãƒ—å†ç”Ÿ
+	// ƒ‹[ƒvÄ¶
 	public void loop() {
 		if (!activeBGM) {
 			return;
@@ -89,7 +89,7 @@ public enum AUDIO {
 		loop();
 	}
 
-	// åˆæœŸåŒ–
+	// ‰Šú‰»
 	public static void init() {
 		values();
 	}

@@ -17,7 +17,7 @@ public class FieldPane extends Resizable {
 	public Component add(Component comp) {
 		try {
 			return super.add(comp);
-		} catch (IllegalArgumentException e) {	// ç¨€ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã™ã‚‹ãŸã‚ä¾‹å¤–å‡¦ç†è¿½åŠ 
+		} catch (IllegalArgumentException e) {	// ‹H‚ÉƒGƒ‰[‚ª”­¶‚·‚é‚½‚ß—áŠOˆ—’Ç‰Á
 			System.err.println(e.getMessage());
 			return add(comp);
 		}

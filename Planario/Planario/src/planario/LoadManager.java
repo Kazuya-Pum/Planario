@@ -14,7 +14,7 @@ public class LoadManager {
 	private LoadManager() {
 	}
 
-	// URLç”Ÿæˆ
+	// URL¶¬
 	public static URL getUrl(String path) {
 		return lm.getClass().getClassLoader().getResource(path);
 	}

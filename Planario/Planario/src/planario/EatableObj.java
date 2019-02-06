@@ -13,7 +13,7 @@ public abstract class EatableObj extends Resizable {
 	public EatableObj(BufferedImage buffimg, int x, int y, int size) {
 		super(buffimg);
 
-		setBounds(x, y, size, size);
+		setBounds(x, y, size);
 		setOpaque(false);
 
 		if (x >= 0) {

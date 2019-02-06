@@ -15,9 +15,9 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private FieldPane field;
 
 	public static final int FPS = 30;
-	private static final int VIRUS = 90; // ã‚¦ã‚¤ãƒ«ã‚¹ã®ã‚µã‚¤ã‚º
-	private static final int SHRINK = 2000 / FPS; // ç¸®å°ã‚¹ãƒ”ãƒ¼ãƒ‰
-	private static final int SHRINK_SIZE = 100; // ç¸®å°ãŒå§‹ã¾ã‚‹ã‚µã‚¤ã‚º
+	private static final int VIRUS = 90; // ƒEƒCƒ‹ƒX‚ÌƒTƒCƒY
+	private static final int SHRINK = 2000 / FPS; // k¬ƒXƒs[ƒh
+	private static final int SHRINK_SIZE = 100; // k¬‚ªn‚Ü‚éƒTƒCƒY
 	private int shrinkCount = 0;
 
 	private MediaTracker tracker;
@@ -25,11 +25,11 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	private BufferedImage virusSkin;
 
 	private Point mouse = new Point();
-	private double Vector2[] = new double[2]; // æ­£è¦åŒ–ã—ãŸã‚«ãƒ¼ã‚½ãƒ«ä½ç½®
+	private double Vector2[] = new double[2]; // ³‹K‰»‚µ‚½ƒJ[ƒ\ƒ‹ˆÊ’u
 
 	private MyClient mc;
 
-	private Dimension dr; // ç”»é¢ã‚µã‚¤ã‚º
+	private Dimension dr; // ‰æ–ÊƒTƒCƒY
 
 	private boolean init = false;
 
@@ -101,7 +101,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 
 			int shrinkRate = p.size / SHRINK_SIZE;
 			if (shrinkCount >= SHRINK && shrinkRate > 0) {
-				// çµŒéæ™‚é–“ã¨ã‚µã‚¤ã‚ºãŒä¸€å®šä»¥ä¸Šã®æ™‚ç¸®å°
+				// Œo‰ßŠÔ‚ÆƒTƒCƒY‚ªˆê’èˆÈã‚Ìk¬
 				p.setEatSize(p.size - shrinkRate);
 			}
 		}
@@ -166,6 +166,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		setSize(1024, 640);
 		setLocationRelativeTo(null);
 		setTitle("Planar.io");
+		this.setIconImage(LoadManager.getBuffImg("res/icon.png"));
 
 		contentPane = new JLayeredPane();
 		setContentPane(contentPane);
@@ -310,7 +311,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		}
 	}
 
-	// æ­£è¦åŒ–
+	// ³‹K‰»
 	private void normalize(int x, int y) {
 		double mag = Math.hypot(x, y);
 
@@ -320,7 +321,7 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 		Vector2[1] = y * dist / mag;
 	}
 
-	// tã§fromã¨toã®é–“ã‚’è£œé–“
+	// t‚Åfrom‚Æto‚ÌŠÔ‚ğ•âŠÔ
 	private int lerp(int from, int to, float t) {
 		boolean positive = from < to;
 
@@ -398,13 +399,13 @@ public class Drow extends JFrame implements MouseMotionListener, ComponentListen
 	public void componentMoved(ComponentEvent e) {
 	}
 
-	// ç”»é¢ã‚µã‚¤ã‚ºå¤‰æ›´ã‚¤ãƒ™ãƒ³ãƒˆ
+	// ‰æ–ÊƒTƒCƒY•ÏXƒCƒxƒ“ƒg
 	@Override
 	public void componentResized(ComponentEvent e) {
 		dr = contentPane.getSize();
 
 		if (!init) {
-			// contentPaneãŒãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã•ã‚Œã€ã‚µã‚¤ã‚ºãŒå–å¾—ã§ããŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§åˆæœŸåŒ–
+			// contentPane‚ªƒŒƒ“ƒ_ƒŠƒ“ƒO‚³‚êAƒTƒCƒY‚ªæ“¾‚Å‚«‚½ƒ^ƒCƒ~ƒ“ƒO‚Å‰Šú‰»
 			initialize();
 		} else {
 			if (gameOver != null) {
