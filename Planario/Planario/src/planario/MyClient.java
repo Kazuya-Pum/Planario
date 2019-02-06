@@ -42,10 +42,19 @@ public class MyClient {
 			serverIP = "localhost";
 		}
 
+		String ips[] = serverIP.split(":");
+
+		int port = 10000;
+
+		if (ips.length == 2) {
+			serverIP = ips[0];
+			port = Integer.parseInt(ips[1]);
+		}
+
 		// サーバに接続する
 		Socket socket = null;
 		try {
-			InetSocketAddress endpoint = new InetSocketAddress(serverIP, 10000);
+			InetSocketAddress endpoint = new InetSocketAddress(serverIP, port);
 			socket = new Socket();
 			socket.connect(endpoint, 4000); // 4000msでtimeout
 		} catch (Exception e) {

@@ -173,6 +173,7 @@ class PlanarioServer {
 	public static void main(String[] args) {
 
 		boolean gui = true;
+		int port = 10000;
 
 		// 引数チェック
 		if (args.length > 0) {
@@ -197,6 +198,11 @@ class PlanarioServer {
 					gui = false;
 					addText("nogui");
 
+				} else if (arg.matches("port=[0-9]+")) {
+					port = getCount(arg);
+					maxPlankton = port;
+					addText("port=" + port);
+
 				}
 			}
 		}
@@ -219,7 +225,7 @@ class PlanarioServer {
 		myClientProcThread = new ConcurrentHashMap<Integer, ClientProcThread>();
 
 		plankton = new PopThread();
-		incomingThread = new IncomingThread(); // 定員時にスレッドを待機させるために別スレッド
+		incomingThread = new IncomingThread(port); // 定員時にスレッドを待機させるために別スレッド
 		incomingThread.start();
 	}
 }
@@ -228,9 +234,10 @@ class IncomingThread extends Thread {
 	private static int member;// 接続しているメンバーの数
 
 	private ServerSocket server;
+	private final int port;
 
-	public IncomingThread() {
-
+	public IncomingThread(int port) {
+		this.port = port;
 	}
 
 	public void run() {
@@ -267,7 +274,7 @@ class IncomingThread extends Thread {
 
 	private ServerSocket createSocket() throws IOException {
 		// 10000番ポートを利用する
-		return new ServerSocket(10000);
+		return new ServerSocket(port);
 	}
 
 	synchronized public void checkCapacity() {
