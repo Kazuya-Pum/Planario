@@ -4,10 +4,6 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 public abstract class EatableObj extends Resizable {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public int size;
@@ -17,7 +13,7 @@ public abstract class EatableObj extends Resizable {
 	public EatableObj(BufferedImage buffimg, int x, int y, int size) {
 		super(buffimg);
 
-		setBounds(x, y, size, size);
+		setBounds(x, y, size);
 		setOpaque(false);
 
 		if (x >= 0) {
@@ -33,15 +29,13 @@ public abstract class EatableObj extends Resizable {
 		}
 
 		this.size = (size > 0) ? size : 1;
-
 	}
 
-	@Override
-	public void setBounds(int x, int y, int width, int height) {
-		super.setBounds(x - (width / 2), y - (height / 2), width, height);
+	public void setBounds(int x, int y, int size) {
+		super.setBounds(x - (size / 2), y - (size / 2), size, size);
 	}
 
 	public int getID() {
-		return localId;
+		return this.localId;
 	}
 }

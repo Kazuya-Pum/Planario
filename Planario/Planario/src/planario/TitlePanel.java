@@ -8,20 +8,19 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
 public class TitlePanel extends JLayeredPane implements ActionListener {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
-	public IpText ipStr;
+	private IpText ipStr;
 	private MyClient mc;
 	private JLabel menu;
 	private JLabel errorText;
+	private JLayeredPane skinPanel;
+	private boolean skinPane = false;
 
 	public TitlePanel(MyClient mc, int width, int height) {
 		this.mc = mc;
@@ -61,9 +60,9 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		errorText.setForeground(new Color(255, 0, 0));
 		errorText.setHorizontalAlignment(JLabel.CENTER);
 
-		Icon seOn = LoadManager.getIcon("res/seOn.png");
-		Icon seOff = LoadManager.getIcon("res/seOff.png");
-		JButton se = new JButton(seOn);
+		BufferedImage seOn = LoadManager.getBuffImg("res/seOn.png");
+		BufferedImage seOff = LoadManager.getBuffImg("res/seOff.png");
+		ResizableButton se = new ResizableButton((AUDIO.getActiveSE()) ? seOn : seOff);
 		se.setBounds(400, 310, 50, 50);
 		se.setBorderPainted(false);
 		se.setOpaque(false);
@@ -75,18 +74,18 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 				AUDIO.toggleSE();
 
 				if (AUDIO.getActiveSE()) {
-					se.setIcon(seOn);
+					se.setImage(seOn);
 				} else {
-					se.setIcon(seOff);
+					se.setImage(seOff);
 				}
 			}
 		});
 
 		menu.add(se);
 
-		Icon bgmOn = LoadManager.getIcon("res/bgmOn.png");
-		Icon bgmOff = LoadManager.getIcon("res/bgmOff.png");
-		JButton bgm = new JButton(bgmOn);
+		BufferedImage bgmOn = LoadManager.getBuffImg("res/bgmOn.png");
+		BufferedImage bgmOff = LoadManager.getBuffImg("res/bgmOff.png");
+		ResizableButton bgm = new ResizableButton((AUDIO.getActiveBGM()) ? bgmOn : bgmOff);
 		bgm.setBounds(400, 360, 50, 50);
 		bgm.setBorderPainted(false);
 		bgm.setOpaque(false);
@@ -98,28 +97,57 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 				AUDIO.toggleBGM();
 
 				if (AUDIO.getActiveBGM()) {
-					bgm.setIcon(bgmOn);
+					bgm.setImage(bgmOn);
 				} else {
-					bgm.setIcon(bgmOff);
+					bgm.setImage(bgmOff);
 				}
 			}
 		});
 
 		menu.add(bgm);
 
+		BufferedImage openSkin = LoadManager.getBuffImg("res/skin.png");
+		BufferedImage closeSkin = LoadManager.getBuffImg("res/skinX.png");
+		ResizableButton skin = new ResizableButton(openSkin);
+		skin.setBounds(0, 0, 75, 75);
+		skin.setBorderPainted(false);
+		skin.setOpaque(false);
+
+		skinPanel = SKINS.getPane();
+
+		skin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (skinPane) {
+					remove(skinPanel);
+					repaint();
+					skin.setImage(openSkin);
+					skinPane = false;
+				} else {
+
+					add(skinPanel, JLayeredPane.PALETTE_LAYER);
+					skin.setImage(closeSkin);
+					skinPane = true;
+				}
+			}
+		});
+
+		menu.add(skin);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String ip = ipStr.getText().trim();
 		ipStr.setText(ip);
-		mc.Access(ip);
+		mc.access(ip);
 	}
 
 	public void setErrorMsg(String msg) {
 		errorText.setText(msg);
 		menu.add(errorText);
 		setLayer(errorText, JLayeredPane.PALETTE_LAYER);
+		repaint();
 	}
 
 	public void hideErrorMsg() {
@@ -132,20 +160,19 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 
 	public void setNewSize(Dimension dr) {
 		setSize(dr);
-		menu.setLocation(dr.width / 2 - menu.getSize().width / 2, dr.height / 2 - menu.getSize().height / 2);
+		menu.setLocation((dr.width - menu.getSize().width) / 2, (dr.height - menu.getSize().height) / 2);
+		skinPanel.setLocation((getSize().width - skinPanel.getSize().width) / 2,
+				(getSize().height - skinPanel.getSize().height) / 2);
+	}
+
+	public void focusIpText() {
+		ipStr.requestFocus();
 	}
 
 	public class IpText extends JTextField {
-
-		/**
-		 *
-		 */
 		private static final long serialVersionUID = 1L;
 
 		private String placeholder;
-
-		public IpText() {
-		}
 
 		@Override
 		protected void paintComponent(Graphics g) {
@@ -164,7 +191,5 @@ public class TitlePanel extends JLayeredPane implements ActionListener {
 		public void setPlaceholder(String s) {
 			placeholder = s;
 		}
-
 	}
-
 }

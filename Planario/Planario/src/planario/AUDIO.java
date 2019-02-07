@@ -18,26 +18,25 @@ public enum AUDIO {
 	private static boolean activeBGM = true;
 
 	private AUDIO(String path) {
-		try (AudioInputStream ais = AudioSystem.getAudioInputStream(LoadManager.getUrl(path))) {
+		// Clip準備
+		try (AudioInputStream ais = AudioSystem.getAudioInputStream(LoadManager.getUrl(path))) {	// ファイル読み込み
 			AudioFormat af = ais.getFormat();
 			DataLine.Info dataLine = new DataLine.Info(Clip.class, af);
 			clip = (Clip) AudioSystem.getLine(dataLine);
 
-			clip.open(ais);
-		} catch (UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			clip.open(ais);	// Clip準備完了
+		} catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	// SEのミュート切り替え
 	public static boolean toggleSE() {
 		activeSE = (activeSE) ? false : true;
 		return activeSE;
 	}
 
+	// BGMのミュート切り替え
 	public static boolean toggleBGM() {
 		activeBGM = (activeBGM) ? false : true;
 
@@ -58,6 +57,7 @@ public enum AUDIO {
 		return activeBGM;
 	}
 
+	// 1回再生
 	public void play() {
 		if (!activeSE) {
 			return;
@@ -70,6 +70,7 @@ public enum AUDIO {
 		clip.start();
 	}
 
+	// ループ再生
 	public void loop() {
 		if (!activeBGM) {
 			return;
@@ -88,7 +89,8 @@ public enum AUDIO {
 		loop();
 	}
 
-	static void init() {
+	// 初期化
+	public static void init() {
 		values();
 	}
 }

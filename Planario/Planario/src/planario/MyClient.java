@@ -7,143 +7,146 @@ import java.awt.Point;
 import java.io.*;
 
 public class MyClient {
-	PrintWriter out;// å‡ºåŠ›ç”¨ã®ãƒ©ã‚¤ã‚¿ãƒ¼
+	PrintWriter out;// o—Í—p‚Ìƒ‰ƒCƒ^[
 
-	ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
-	int myNumberInt;
-	Drow drow;
-	int planktonSize = 10;
-	int planktonScore = 1;
-	int defualtSize = 30;
-	PlayerData planktons;
-	int fieldSize = 4000;
-	int score = 0;
-	boolean loginFlag = false;
+	public ConcurrentHashMap<Integer, PlayerData> playerData = new ConcurrentHashMap<Integer, PlayerData>();
+	private int myNumberInt;
+	private Drow drow;
+	final int planktonSize = 10;
+	final int planktonScore = 1;
+	final int defualtSize = 30;
+	private PlayerData planktons;
+	public static int fieldSize = 4000;
+	public int score = 0;
+	public boolean loginFlag = false;
 
-	MesgSendThread mst;
+	 MesgSendThread mst;
 
-	static boolean accessFlag = false;
+	private static boolean accessFlag = false;
 
 	public MyClient() {
 		drow = new Drow(this);
 		drow.setVisible(true);
 	}
 
-	public void Access(String serverIP) {
+	public void access(String serverIP) {
 
+		// d•¡‚µ‚Äƒƒ\ƒbƒh‚ğÀs‚³‚¹‚È‚¢‚æ‚¤‚Éƒtƒ‰ƒO‚ÅŠÇ—
+		if (accessFlag) {
+			return;
+		} else {
+			accessFlag = true;
+		}
 
-			// é‡è¤‡ã—ã¦ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å®Ÿè¡Œã•ã›ãªã„ã‚ˆã†ã«ãƒ•ãƒ©ã‚°ã§ç®¡ç†
-			if (accessFlag) {
-				return;
-			} else {
-				accessFlag = true;
+		if (serverIP.equals("")) {
+			serverIP = "localhost";
+		}
+
+		String ips[] = serverIP.split(":");
+
+		int port = 10000;
+
+		if (ips.length == 2) {
+			serverIP = ips[0];
+			port = Integer.parseInt(ips[1]);
+		}
+
+		// ƒT[ƒo‚ÉÚ‘±‚·‚é
+		Socket socket = null;
+		try {
+			InetSocketAddress endpoint = new InetSocketAddress(serverIP, port);
+			socket = new Socket();
+			socket.connect(endpoint, 4000); // 4000ms‚Åtimeout
+		} catch (Exception e) {
+			System.err.println("ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
+
+			String err;
+			switch (e.getClass().getSimpleName()) {
+			case "SocketTimeoutException":
+				err = "ƒ^ƒCƒ€ƒAƒEƒg‚µ‚Ü‚µ‚½";
+				break;
+			case "UnknownHostException":
+				err = "ƒzƒXƒg‚ğ“Á’è‚Å‚«‚Ü‚¹‚ñ";
+				break;
+			default:
+				err = "ƒT[ƒo[‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñ";
 			}
 
-			String myName = "";
+			drow.setTitleError(err);
+			accessFlag = false;
+			return;
+		}
 
-			if (serverIP.equals("")) {
-				serverIP = "localhost";
-			}
+		playerData.put(0, new PlayerData(0));
+		planktons = getPlayer(0);
 
-			// ã‚µãƒ¼ãƒã«æ¥ç¶šã™ã‚‹
-			Socket socket = null;
-			try {
-				InetSocketAddress endpoint = new InetSocketAddress(serverIP, 10000);
-				socket = new Socket();
-				socket.connect(endpoint, 4000); // 4000msã§timeout
-			} catch (SocketTimeoutException e) {
-				System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
-				drow.title.setErrorMsg("ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ã¾ã—ãŸ");
-				accessFlag = false;
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				return;
-			} catch (UnknownHostException e) {
-				System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
-				drow.title.setErrorMsg("ãƒ›ã‚¹ãƒˆã‚’ç‰¹å®šã§ãã¾ã›ã‚“");
-				accessFlag = false;
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				return;
-			} catch (Exception e) {
-				System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
-				drow.title.setErrorMsg("ã‚µãƒ¼ãƒãƒ¼ã«æ¥ç¶šã§ãã¾ã›ã‚“");
-				accessFlag = false;
-				return;
-			}
+		MesgRecvThread mrt = new MesgRecvThread(socket);// óM—p‚ÌƒXƒŒƒbƒh‚ğì¬‚·‚é
+		mrt.start();// ƒXƒŒƒbƒh‚ğ“®‚©‚·iRun‚ª“®‚­j
 
-			playerData.put(0, new PlayerData(0));
-			planktons = GetPlayer(0);
+		mst = new MesgSendThread(this);
 
-			MesgRecvThread mrt = new MesgRecvThread(socket, myName);// å—ä¿¡ç”¨ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ä½œæˆã™ã‚‹
-			mrt.start();// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‹•ã‹ã™ï¼ˆRunãŒå‹•ãï¼‰
-
-			mst = new MesgSendThread(this);
-
-			drow.title.hideErrorMsg();
-			drow.hideTilePane();
+		drow.hideTilePane();
 	}
 
-	// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡ã®ãŸã‚ã®ã‚¹ãƒ¬ãƒƒãƒ‰
+	// ƒƒbƒZ[ƒWóM‚Ì‚½‚ß‚ÌƒXƒŒƒbƒh
 	public class MesgRecvThread extends Thread {
 
 		Socket socket;
-		String myName;
 
-		public MesgRecvThread(Socket s, String n) {
+		public MesgRecvThread(Socket s) {
 			socket = s;
-			myName = n;
 		}
 
-		// é€šä¿¡çŠ¶æ³ã‚’ç›£è¦–ã—ï¼Œå—ä¿¡ãƒ‡ãƒ¼ã‚¿ã«ã‚ˆã£ã¦å‹•ä½œã™ã‚‹
+		// ’ÊMó‹µ‚ğŠÄ‹‚µCóMƒf[ƒ^‚É‚æ‚Á‚Ä“®ì‚·‚é
 		public void run() {
 			try {
 				InputStreamReader sisr = new InputStreamReader(socket.getInputStream());
 				BufferedReader br = new BufferedReader(sisr);
 				out = new PrintWriter(socket.getOutputStream(), true);
-				out.println(myName);// æ¥ç¶šã®æœ€åˆã«åå‰ã‚’é€ã‚‹
 
-				myNumberInt = GetMyNumber(br);
+				int skin = SKINS.getSelect();
+				out.println(skin);// Ú‘±‚ÌÅ‰‚Éskin”Ô†‚ğ‘—‚é
 
-				Join(myNumberInt);
+				initMyNumber(br); // ©•ª‚ÌID‚ğæ“¾
+
+				joinGame(getMyID(), skin);
+
+				getOptions(br);
 
 				drow.Login();
 				score = 0;
-				SendMessage("Join " + myNumberInt);
+				sendMessage("Join " + getMyID() + " " + skin);
 
 				while (true) {
-					String inputLine = br.readLine();// ãƒ‡ãƒ¼ã‚¿ã‚’ä¸€è¡Œåˆ†ã ã‘èª­ã¿è¾¼ã‚“ã§ã¿ã‚‹
-					if (inputLine != null) {// èª­ã¿è¾¼ã‚“ã ã¨ãã«ãƒ‡ãƒ¼ã‚¿ãŒèª­ã¿è¾¼ã¾ã‚ŒãŸã‹ã©ã†ã‹ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
-						String[] inputTokens = inputLine.split(" "); // å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ã‚’è§£æã™ã‚‹ãŸã‚ã«ã€ã‚¹ãƒšãƒ¼ã‚¹ã§åˆ‡ã‚Šåˆ†ã‘ã‚‹
-						String cmd = inputTokens[0];// ã‚³ãƒãƒ³ãƒ‰ã®å–ã‚Šå‡ºã—ï¼ï¼‘ã¤ç›®ã®è¦ç´ ã‚’å–ã‚Šå‡ºã™
+					String inputLine = br.readLine();// ƒf[ƒ^‚ğˆês•ª‚¾‚¯“Ç‚İ‚ñ‚Å‚İ‚é
+					if (inputLine != null) {// “Ç‚İ‚ñ‚¾‚Æ‚«‚Éƒf[ƒ^‚ª“Ç‚İ‚Ü‚ê‚½‚©‚Ç‚¤‚©‚ğƒ`ƒFƒbƒN‚·‚é
+						String[] inputTokens = inputLine.split(" "); // “ü—Íƒf[ƒ^‚ğ‰ğÍ‚·‚é‚½‚ß‚ÉAƒXƒy[ƒX‚ÅØ‚è•ª‚¯‚é
+						String cmd = inputTokens[0];// ƒRƒ}ƒ“ƒh‚Ìæ‚èo‚µD‚P‚Â–Ú‚Ì—v‘f‚ğæ‚èo‚·
 
 						switch (cmd) {
 						case "Update":
-							Update(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
+							update(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]),
 									Integer.parseInt(inputTokens[5]));
 							break;
 						case "Delete":
-							Delete(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
+							delete(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						case "Join":
-							if (Integer.parseInt(inputTokens[1]) == myNumberInt) {
+							if (Integer.parseInt(inputTokens[1]) == getMyID()) {
 								break;
 							}
-							Join(Integer.parseInt(inputTokens[1]));
+							joinGame(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						case "Disconnect":
-							Disconnect(Integer.parseInt(inputTokens[1]));
+							disconnect(Integer.parseInt(inputTokens[1]));
 							break;
 						case "Pop":
-							Pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
+							pop(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]),
 									Integer.parseInt(inputTokens[3]), Integer.parseInt(inputTokens[4]));
+							break;
+						case "Skin":
+							setSkin(Integer.parseInt(inputTokens[1]), Integer.parseInt(inputTokens[2]));
 							break;
 						default:
 							break;
@@ -152,96 +155,130 @@ public class MyClient {
 						break;
 					}
 
-					// è‡ªèº«ã®ãƒ—ãƒ©ãƒŠãƒªã‚¢ã®æ•°ãŒ0ã«ãªã‚Œã°ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼åˆ¤å®š
-					if (GetPlayer(myNumberInt).planariaData.size() == 0) {
+					// ©g‚Ìƒvƒ‰ƒiƒŠƒA‚Ì”‚ª0‚É‚È‚ê‚ÎƒQ[ƒ€ƒI[ƒo[”»’è
+					if (getPlayer(getMyID()).planariaData.size() == 0) {
 						drow.setGameOver();
-						SendMessage("BYE");
-						resetField();
-						loginFlag = false;
-						accessFlag = false; // ã‚¢ã‚¯ã‚»ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ç”¨å¯èƒ½ã«
-
-						AUDIO.BGM.stop();
-						AUDIO.END.play();
+						sendMessage("BYE");
+						endGame();
 
 						break;
 					}
 				}
 				socket.close();
 			} catch (IOException e) {
-				System.err.println("ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
+				System.err.println("ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
+				drow.setTitlePane();
+				drow.setTitleError("ƒT[ƒo[‚Æ‚ÌÚ‘±‚ªØ‚ê‚Ü‚µ‚½");
+				endGame();
 			}
 		}
 	}
 
-	private int GetMyNumber(BufferedReader br) {
+	private void initMyNumber(BufferedReader br) {
 		String myNumberStr;
 		try {
 			myNumberStr = br.readLine();
-			return Integer.parseInt(myNumberStr);
+			this.myNumberInt = Integer.parseInt(myNumberStr);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
-			return GetMyNumber(br);
+			initMyNumber(br);
 		}
-		return 0;
+	}
+
+	public int getMyID() {
+		return this.myNumberInt;
+	}
+
+	private void setSkin(int userID, int skinID) {
+		if (userID != getMyID()) {
+			joinGame(userID, skinID);
+		}
+	}
+
+	private void getOptions(BufferedReader br) {
+		String serverFieldSize;
+		try {
+			serverFieldSize = br.readLine();
+			String[] inputTokens = serverFieldSize.split(" ");
+			if (inputTokens[0].equals("field")) {
+				fieldSize = Integer.parseInt(inputTokens[1]);
+				System.out.println("fieldSize=" + fieldSize);
+				drow.changeFieldSize(fieldSize);
+			} else {
+				getOptions(br);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// userID planariaID posX posY size
-	public void Update(int userID, int planariaID, int posX, int posY, int size) {
-		if (userID != myNumberInt) {
+	public void update(int userID, int planariaID, int posX, int posY, int size) {
+		if (userID != getMyID()) {
 
-			PlayerData player = GetPlayer(userID);
+			PlayerData player = getPlayer(userID);
+
+			if (player == null) {
+				return;
+			}
 
 			if (player.planariaData.containsKey(planariaID)) {
-				((Planaria) player.planariaData.get(planariaID)).setCurrent(posX, posY, size);
+				((Planaria) player.planariaData.get(planariaID)).setData(posX, posY, size);
 			} else {
 				System.out.println("NotFound : " + planariaID);
-				drow.Create(player.skin, posX, posY, size, userID, planariaID);
+				drow.create(player.getSkin(), posX, posY, size, userID, planariaID);
 			}
 		}
 	}
 
-	public void Pop(int planktonID, int posX, int posY, int virus) {
+	public void pop(int planktonID, int posX, int posY, int virus) {
 		if (!planktons.planariaData.containsKey(planktonID)) {
 			Plankton plankton;
 
 			if (virus == 1) {
-				plankton = drow.PopVirus(posX, posY, planktonID);
+				plankton = drow.popVirus(posX, posY, planktonID);
 			} else {
-				plankton = drow.PopPlankton(posX, posY, planktonID);
+				plankton = drow.popPlankton(posX, posY, planktonID);
 			}
 			planktons.planariaData.put(planktonID, plankton);
 		}
 	}
 
-	public PlayerData GetPlayer(int userID) {
-		if (playerData.containsKey(userID)) {
-			return playerData.get(userID);
-		} else {
-			return Join(userID);
-		}
+	public PlayerData getPlayer(int userID) {
+		return playerData.get(userID);
 	}
 
 	// userID planariaID
-	public void Delete(int userID, int planariaID) {
-		drow.Delete(GetPlayer(userID).planariaData.get(planariaID));
-		GetPlayer(userID).planariaData.remove(planariaID);
+	public void delete(int userID, int planariaID) {
+		drow.delete(getPlayer(userID).planariaData.get(planariaID));
+		getPlayer(userID).planariaData.remove(planariaID);
 	}
 
-	// userID posX posY
-	public PlayerData Join(int ID) {
-		PlayerData p = new PlayerData(ID);
+	// userID skin
+	public PlayerData joinGame(int ID, int skin) {
+
+		PlayerData p = new PlayerData(ID, skin);
 		playerData.put(ID, p);
 
 		return p;
 	}
 
-	public void Disconnect(int userID) {
-		for (EatableObj p : GetPlayer(userID).planariaData.values()) {
-			drow.Delete(p);
+	public void disconnect(int userID) {
+		for (EatableObj p : getPlayer(userID).planariaData.values()) {
+			drow.delete(p);
 			p = null;
 		}
 		playerData.remove(userID);
+	}
+
+	private void endGame() {
+		loginFlag = false;
+		resetField();
+		accessFlag = false; // ƒAƒNƒZƒXƒƒ\ƒbƒh‚ğg—p‰Â”\‚É
+
+		AUDIO.BGM.stop();
+		AUDIO.END.play();
 	}
 
 	private void resetField() {
@@ -250,7 +287,7 @@ public class MyClient {
 		drow.fieldReset();
 	}
 
-	public void SendMessage(String msg) {
+	public void sendMessage(String msg) {
 		try {
 			out.println(msg);
 			out.flush();
@@ -259,10 +296,10 @@ public class MyClient {
 		}
 	}
 
-	public void SendMyPlanariaData(Planaria p) {
+	public void sendMyPlanariaData(Planaria p) {
 		StringBuilder buf = new StringBuilder();
 		buf.append("Update ");
-		buf.append(myNumberInt);
+		buf.append(getMyID());
 		buf.append(" ");
 		buf.append(p.getID());
 		buf.append(" ");
@@ -271,10 +308,10 @@ public class MyClient {
 		buf.append(p.current.y);
 		buf.append(" ");
 		buf.append(p.size);
-		SendMessage(buf.toString());
+		sendMessage(buf.toString());
 	}
 
-	public void Search(Planaria p) {
+	public void search(Planaria p) {
 
 		for (PlayerData player : playerData.values()) {
 			for (EatableObj planaria : player.planariaData.values()) {
@@ -284,8 +321,8 @@ public class MyClient {
 
 				if (Math.hypot(planaria.current.x - p.current.x, planaria.current.y - p.current.y) <= p.size / 3) {
 					if (planaria.size < p.size * 0.9) {
-						Eat(p, player.getID(), planaria);
-					} else if (myNumberInt == player.getID()) {
+						eat(p, player.getID(), planaria);
+					} else if (getMyID() == player.getID()) {
 						int x = p.current.x - planaria.current.x;
 						int y = p.current.y - planaria.current.y;
 
@@ -294,28 +331,30 @@ public class MyClient {
 						x = (int) (x / diff * (p.size + planaria.size) / 4);
 						y = (int) (y / diff * (p.size + planaria.size) / 4);
 
-						p.setData(planaria.current.x + x, planaria.current.y + y, -1);
+						p.setNext(planaria.current.x + x, planaria.current.y + y);
 					}
 				}
 			}
 		}
 	}
 
-	public void Eat(Planaria myPlanaria, int userID, EatableObj p) {
-		if (userID != myNumberInt) {
+	public void eat(Planaria myPlanaria, int userID, EatableObj p) {
+		int size = p.size;
+
+		if (userID != getMyID()) {
 			if (userID == 0) {
-				p.size = planktonScore;
+				size = planktonScore;
 
 				if (((Plankton) p).isVirus()) {
-					drow.VirusSpilit(myPlanaria);
+					drow.virusSpilit(myPlanaria);
 				}
 			}
-			score += p.size;
+			score += size;
 		}
 
-		myPlanaria.setData(-1, -1, myPlanaria.size + p.size);
-		Delete(userID, p.getID());
-		SendMessage("Delete " + userID + " " + p.getID());
+		myPlanaria.setEatSize(myPlanaria.size + size);
+		delete(userID, p.getID());
+		sendMessage("Delete " + userID + " " + p.getID());
 
 		if (userID == 0) {
 			AUDIO.EAT_1.play();

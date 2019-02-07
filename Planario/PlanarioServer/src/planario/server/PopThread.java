@@ -1,24 +1,26 @@
 package planario.server;
 
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PopThread extends Thread {
 
-	public static ConcurrentHashMap<Integer, Plankton> planktonData = new ConcurrentHashMap<Integer, Plankton>();
+	private static ConcurrentHashMap<Integer, Plankton> planktonData = new ConcurrentHashMap<Integer, Plankton>();
 	private Random random = new Random();
-	private static final int fieldSize = 4000;
-	private static final int MAX_PLANKTON = 300;
+	private final int fieldSize;
+	private final int maxPlankton;
 
 	public PopThread() {
-
+		this.fieldSize = PlanarioServer.getFieldSize();
+		this.maxPlankton = PlanarioServer.getMaxPlankton();
 	}
 
 	public void run() {
 		while (true) {
 
 			int count = planktonData.size();
-			if (count <= MAX_PLANKTON && random.nextInt(10) <= 1) {
+			if (count <= maxPlankton && random.nextInt(10) <= 1) {
 
 				if (random.nextInt(20) == 0) {
 					pop(true);
@@ -39,13 +41,14 @@ public class PopThread extends Thread {
 		Plankton p = new Plankton(random.nextInt(fieldSize), random.nextInt(fieldSize), virus);
 		planktonData.put(p.getId(), p);
 
-		System.out.println("Pop Plankton " + p.getId());
-		PlanarioServer.SendAll(p.toString(), "");
+		PlanarioServer.sendAll(p.toString());
 	}
 
 	public static void delete(int id) {
 		planktonData.remove(id);
+	}
 
-		System.out.println("Delete Plankton " + id);
+	public static Collection<Plankton> getData() {
+		return planktonData.values();
 	}
 }

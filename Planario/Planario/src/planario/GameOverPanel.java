@@ -9,12 +9,9 @@ import java.awt.event.MouseListener;
 import javax.swing.*;
 
 public class GameOverPanel extends Resizable implements KeyListener, MouseListener {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
-	JLabel scoreText;
-	Drow drow;
+	private JLabel scoreText;
+	private Drow drow;
 
 	public GameOverPanel(int width, int height, Drow drow) {
 		super("res/GameOver.png");
@@ -39,7 +36,6 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-
 	}
 
 	@Override
@@ -49,7 +45,6 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-
 	}
 
 	@Override
@@ -59,22 +54,17 @@ public class GameOverPanel extends Resizable implements KeyListener, MouseListen
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-
 	}
-
 }
