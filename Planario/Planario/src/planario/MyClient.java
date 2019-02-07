@@ -15,12 +15,12 @@ public class MyClient {
 	final int planktonSize = 10;
 	final int planktonScore = 1;
 	final int defualtSize = 30;
-	PlayerData planktons;
+	private PlayerData planktons;
 	public static int fieldSize = 4000;
 	public int score = 0;
 	public boolean loginFlag = false;
 
-	MesgSendThread mst;
+	 MesgSendThread mst;
 
 	private static boolean accessFlag = false;
 
@@ -255,7 +255,7 @@ public class MyClient {
 		getPlayer(userID).planariaData.remove(planariaID);
 	}
 
-	// userID posX posY
+	// userID skin
 	public PlayerData joinGame(int ID, int skin) {
 
 		PlayerData p = new PlayerData(ID, skin);

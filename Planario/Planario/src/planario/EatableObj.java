@@ -29,7 +29,6 @@ public abstract class EatableObj extends Resizable {
 		}
 
 		this.size = (size > 0) ? size : 1;
-
 	}
 
 	public void setBounds(int x, int y, int size) {
